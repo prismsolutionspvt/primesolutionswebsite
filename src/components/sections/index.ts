@@ -1,0 +1,10 @@
+export { Hero } from "./hero/Hero";
+export { About } from "./about/About";
+export { Services } from "./services/Services";
+export { Why } from "./why/Why";
+export { Industries } from "./industries/Industries";
+export { Approach } from "./approach/Approach";
+export { Founder } from "./founder/Founder";
+export { Testimonials } from "./testimonials/Testimonials";
+export { Faq } from "./faq/Faq";
+export { Contact } from "./contact/Contact";

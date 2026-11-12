@@ -1,0 +1,22 @@
+﻿# dependencies
+node_modules
+
+# next.js
+.next
+out
+
+# env â€” never commit real values (see .env.example)
+.env
+.env.*
+!.env.example
+
+# build / tooling artefacts
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# local tooling
+.claude
+.vscode/*
+!.vscode/extensions.json
