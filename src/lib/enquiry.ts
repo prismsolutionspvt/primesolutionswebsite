@@ -1,4 +1,4 @@
-import { site } from "@/lib/config";
+import { site } from "@/config/site";
 import type { Enquiry, EnquiryErrors, EnquiryResult } from "@/types";
 
 /**

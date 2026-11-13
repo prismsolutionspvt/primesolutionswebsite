@@ -8,7 +8,7 @@ import type { Enquiry, EnquiryErrors } from "@/types";
 const empty: Enquiry = { name: "", email: "", company: "", phone: "", service: "", message: "" };
 
 const field =
-  "peer w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-base text-ink placeholder:text-muted/60 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/30 aria-[invalid=true]:border-red-500";
+  "peer w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-base text-ink placeholder:text-muted/60 outline-none transition-all duration-300 focus:border-accent focus:shadow-[0_0_0_4px_rgb(var(--accent)/0.16),0_8px_30px_-12px_rgb(var(--accent)/0.45)] aria-[invalid=true]:border-red-500";
 
 export function ContactForm() {
   const [data, setData] = useState<Enquiry>(empty);

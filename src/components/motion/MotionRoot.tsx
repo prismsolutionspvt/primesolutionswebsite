@@ -9,6 +9,7 @@ import { prefersReducedMotion } from "@/lib/motion";
  *  [data-fade]     fade/translate-in (IntersectionObserver, no GSAP cost)
  *  [data-clip]     image/graphic wipe reveal
  *  [data-parallax] scroll-linked y offset (desktop, motion-allowed only)
+ *  [data-draw-on-view] SVG path (pathLength=1) that draws itself when scrolled into view
  * Section-specific choreography lives in each section component.
  */
 export function MotionRoot() {
@@ -57,6 +58,16 @@ export function MotionRoot() {
               whenReady(() =>
                 gsap.to(el, { clipPath: "inset(0 0 0% 0)", duration: 1.3, ease: "expo.inOut" }),
               ),
+          });
+        });
+
+        document.querySelectorAll<SVGPathElement>("[data-draw-on-view]").forEach((path) => {
+          gsap.set(path, { strokeDasharray: 1, strokeDashoffset: 1 });
+          ScrollTrigger.create({
+            trigger: path.ownerSVGElement ?? path,
+            start: "top 85%",
+            once: true,
+            onEnter: () => whenReady(() => gsap.to(path, { strokeDashoffset: 0, duration: 2.2, ease: "power2.inOut" })),
           });
         });
 

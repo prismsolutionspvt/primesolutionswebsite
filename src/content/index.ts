@@ -1,4 +1,6 @@
+export * from "./hero";
 export * from "./about";
+export * from "./services";
 export * from "./why";
 export * from "./industries";
 export * from "./approach";
@@ -7,4 +9,3 @@ export * from "./faq";
 export * from "./cta";
 export * from "./testimonials";
 export * from "./announcement";
-export * from "./services";

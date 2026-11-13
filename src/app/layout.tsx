@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Manrope, JetBrains_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import { site } from "@/lib/config";
+import { site } from "@/config/site";
 
 const display = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -12,7 +12,7 @@ const display = Bricolage_Grotesque({
 const body = Manrope({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
-const title = "Prism Solutions | Digital Marketing, Sales & Customer Support Outsourcing";
+const title = "Prism Solutions | BPO & Digital Services";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -34,22 +34,23 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F6F7FB" },
-    { media: "(prefers-color-scheme: dark)", color: "#060E24" },
-  ],
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
 };
 
-/** Runs before paint: theme, js flag, and first-visit preloader state — avoids flashes. */
+/**
+ * Runs before first paint: light theme by default (a saved preference wins), a "js" flag,
+ * and the first-visit preloader flag — so there is no flash of the wrong theme or content.
+ */
 const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');
-try{var t=localStorage.getItem('prism-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}d.dataset.theme=t}catch(e){d.dataset.theme='light'}
+var t='light';try{var s=localStorage.getItem('prism-theme');if(s==='dark'||s==='light')t=s}catch(e){}
+d.dataset.theme=t;
 try{if(!sessionStorage.getItem('prism-seen')){d.classList.add('is-preloading')}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="en" data-theme="light" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
         <noscript>

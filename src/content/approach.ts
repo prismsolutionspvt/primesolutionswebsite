@@ -1,30 +1,15 @@
+import type { Stage } from "@/types";
+
+/** Source: portfolio section 07, "How we work". */
 export const approach = {
-  heading: "From Understanding to Execution.",
+  eyebrow: "Our Approach",
+  heading: "How we work.",
+  text: "Five stages from first conversation to continuous improvement.",
   stages: [
-    {
-      n: "01",
-      name: "Discovery",
-      text: "We learn your business, your objectives, your target audience and your requirements.",
-    },
-    {
-      n: "02",
-      name: "Strategy & Planning",
-      text: "We shape the right solution and define the scope, so expectations are clear on both sides.",
-    },
-    {
-      n: "03",
-      name: "Preparation",
-      text: "Workflows, resources, communication channels and responsibilities are organised before anything goes live.",
-    },
-    {
-      n: "04",
-      name: "Execution",
-      text: "The agreed services are delivered professionally, with consistent attention to detail.",
-    },
-    {
-      n: "05",
-      name: "Review & Improvement",
-      text: "We evaluate progress, share updates and identify what can be done better next.",
-    },
-  ],
+    { n: "01", name: "Understand", text: "Understand goals, current processes and service expectations." },
+    { n: "02", name: "Define", text: "Define scope, responsibilities, communication channels and success measures." },
+    { n: "03", name: "Agree", text: "Agree onboarding, access, training and quality requirements." },
+    { n: "04", name: "Deliver", text: "Deliver the agreed services and share progress through defined reporting." },
+    { n: "05", name: "Review", text: "Review performance and identify practical improvements." },
+  ] satisfies Stage[],
 };

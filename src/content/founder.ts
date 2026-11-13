@@ -1,10 +1,14 @@
-// Founder placeholder. Fill name, designation, message and photoUrl (a /public path) to publish the real note.
-export const founder = {
-  heading: "Founder's Message",
-  placeholder: "An introduction from the leadership team will be shared here.",
-  // Future admin fields:
-  name: "" as string,
-  designation: "" as string,
-  message: "" as string,
-  photoUrl: "" as string,
+import type { Founder } from "@/types";
+
+/**
+ * Founder / leadership message.
+ * Fill ALL fields to publish the section; while name or message is empty the section is not rendered at all
+ * (no empty placeholder is ever shown). Later this is managed from the admin panel.
+ * `photoUrl` is a /public path (e.g. "/founder/portrait.jpg") or an absolute URL.
+ */
+export const founder: Founder = {
+  name: "",
+  designation: "",
+  message: "",
+  photoUrl: "",
 };

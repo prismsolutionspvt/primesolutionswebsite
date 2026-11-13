@@ -2,44 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ───────── Design tokens (brand extracted from the supplied logo) ─────────
-   navy  #0B1F4B  — wordmark         orange #F28A1E — arc
-   amber #F7A83B  — star
-   Change these variables to re-skin the whole site. */
+/* ───────── Design tokens (brand from the supplied logo) ─────────
+   navy   #0B1F4B  — wordmark      orange #F28A1E — arc
+   amber  #F7A83B  — star
+   LIGHT is the default theme. Every colour on the site comes from these variables,
+   so both themes are designed, not inverted. */
 :root {
-  --bg: 246 247 251;
-  --surface: 255 255 255;
-  --surface2: 236 239 246;
+  --bg: 255 255 255;
+  --surface: 247 249 252;
+  --surface2: 238 242 249;
   --ink: 11 31 75;
-  --muted: 74 87 120;
-  --line: 217 222 234;
+  --muted: 70 84 118;
+  --line: 219 225 237;
   --accent: 242 138 30;
   --accent-text: 176 88 0; /* AA-safe orange for small text on light */
+  --glow: 242 138 30;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --bg: 6 14 36;
-  --surface: 12 24 54;
-  --surface2: 18 32 70;
+  --bg: 7 15 38;
+  --surface: 13 25 56;
+  --surface2: 20 35 76;
   --ink: 238 242 252;
-  --muted: 160 172 203;
-  --line: 33 48 90;
+  --muted: 163 175 206;
+  --line: 34 49 92;
   --accent: 245 154 51;
   --accent-text: 247 168 59;
+  --glow: 247 168 59;
   color-scheme: dark;
 }
-/* Sections that stay dark in both themes (rhythm + contrast) */
-.surface-night {
-  --bg: 4 10 26;
-  --surface: 10 20 46;
-  --surface2: 16 30 66;
-  --ink: 238 242 252;
-  --muted: 160 172 203;
-  --line: 30 45 86;
-  --accent: 245 154 51;
-  --accent-text: 247 168 59;
-  background: rgb(var(--bg));
-  color: rgb(var(--ink));
+/* Forces the light palette (used by the white preloader regardless of theme) */
+.surface-day {
+  --bg: 255 255 255;
+  --surface: 247 249 252;
+  --surface2: 238 242 249;
+  --ink: 11 31 75;
+  --muted: 70 84 118;
+  --line: 219 225 237;
+  --accent: 242 138 30;
+  --accent-text: 176 88 0;
+  background: #fff;
+  color: rgb(11 31 75);
 }
 
 html {
@@ -194,3 +197,56 @@ html.is-preloading .preloader { display: flex; }
 @keyframes panel-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .panel-in { animation: panel-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @media (prefers-reduced-motion: reduce) { .panel-in { animation: none; } }
+
+/* The logo artwork has a white background: give it a white plate in dark mode */
+:root[data-theme="dark"] .logo-plate {
+  background: #fff;
+  border-radius: 0.85rem;
+  padding: 0.3rem 0.55rem;
+}
+
+/* FAQ rows rise in when the topic changes */
+@keyframes faq-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.faq-in { animation: faq-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--d, 0s); }
+@media (prefers-reduced-motion: reduce) { .faq-in { animation: none; } }
+
+/* ───────── WhatsApp assistant scene ───────── */
+.robot .robot-head { animation: robot-bob 4.2s ease-in-out infinite; transform-origin: 77px 100px; }
+.robot .robot-eyes, .robot .robot-star { transform-box: fill-box; transform-origin: center; }
+.robot .robot-eyes { animation: robot-blink 5.4s infinite; }
+.robot .robot-star { animation: robot-twinkle 2.6s ease-in-out infinite; }
+.robot .robot-cord { animation: robot-sway 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: top left; }
+.robot .robot-waves { opacity: 0; }
+.robot .robot-bell { transform-origin: 198px 128px; }
+.robot .robot-handset { transform-origin: 128px 80px; }
+.robot.is-ringing .robot-waves { animation: robot-waves 0.6s linear 3; }
+.robot.is-ringing .robot-bell { animation: robot-shake 0.1s linear infinite; }
+.robot.is-ringing .robot-handset { animation: robot-shake 0.12s linear infinite; }
+@keyframes robot-bob { 50% { transform: translateY(-3px) rotate(-1.4deg); } }
+@keyframes robot-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes robot-twinkle { 50% { transform: scale(0.72) rotate(18deg); opacity: 0.75; } }
+@keyframes robot-sway { 50% { transform: translateX(2px) rotate(1.5deg); } }
+@keyframes robot-waves { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes robot-shake { 0%, 100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-1.2px) rotate(-1.5deg); } 75% { transform: translateX(1.2px) rotate(1.5deg); } }
+.whatsapp-fab::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid #25d366; opacity: 0; animation: fab-ping 2.6s ease-out 4; pointer-events: none; }
+@keyframes fab-ping { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(1.7); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .robot *, .whatsapp-fab::after { animation: none !important; }
+}
+
+/* ───────── Buttons: sheen sweep, soft glow ───────── */
+.btn-primary::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%); transform: translateX(-120%); transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); pointer-events: none; }
+.btn-primary:hover::before { transform: translateX(120%); }
+.btn-primary { box-shadow: 0 10px 30px -12px rgb(var(--accent) / 0.65); }
+
+/* twinkling star used in ambient scenes */
+@keyframes twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1); } }
+.twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle 3.2s ease-in-out infinite; }
+@keyframes live-ping { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(2.6); opacity: 0; } }
+.live-dot::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: rgb(var(--accent)); animation: live-ping 2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .twinkle, .live-dot::after { animation: none; } }
+
+/* Why-Prism ring: the ring turns, the numbers stay upright (pure CSS, driven by --r) */
+.why-ring { transform: rotate(var(--r, 0deg)); transform-origin: 260px 260px; transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1); }
+.why-ring .why-num { transform: rotate(calc(var(--r, 0deg) * -1)); transform-box: fill-box; transform-origin: center; transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1); }
+@media (prefers-reduced-motion: reduce) { .why-ring, .why-ring .why-num { transition: none; } }

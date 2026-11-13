@@ -1,14 +1,13 @@
 import { ArrowLeft } from "lucide-react";
-import { PrismMark, Wordmark } from "@/components/ui/Logo";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function LegalShell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <main className="min-h-screen">
       <div className="wrap flex items-center justify-between py-5">
-        <a href="/" className="flex items-center gap-2.5" aria-label="Prism Solutions home">
-          <PrismMark className="h-7 w-auto" />
-          <Wordmark />
+        <a href="/" aria-label="Prism Solutions home">
+          <BrandLogo height={48} priority />
         </a>
         <ThemeToggle />
       </div>

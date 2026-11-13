@@ -28,7 +28,7 @@ Do not add invented clients, testimonials, statistics, certifications, office lo
 
 - **A new homepage section:** create `src/components/sections/<name>/<Name>.tsx`, export it from `sections/index.ts`, add its copy to `src/content/<name>.ts` and types to `src/types`, then place it in `src/app/page.tsx`. Give the root `<section>` an `id` if it needs a nav anchor.
 - **A new service or industry:** edit `src/content/services.ts` or `industries.ts`. Services also need a drawing in `sections/services/ServiceGlyph.tsx` (keyed by service `id`).
-- **A new environment variable:** add it to `src/lib/config.ts`, `.env.example` and the README table.
+- **A new environment variable:** add it to `src/config/site.ts`, `.env.example` and the README table.
 - **A new animation:** prefer the shared data attributes handled by `MotionRoot`. For bespoke choreography use `registerGsap()` inside `gsap.context` and clean up on unmount.
 
 ## Security

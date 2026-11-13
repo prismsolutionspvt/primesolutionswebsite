@@ -22,13 +22,13 @@ This repository is the **frontend phase**. There is no database, authentication 
 
 ## Features
 
-- Cinematic preloader (once per session; progress follows real font/page readiness).
-- Hero with a custom prism-and-rays motion graphic and scroll-linked transitions.
-- Sections: Who we are, Services (interactive explorer), Why Prism, Industries (swipeable), Approach, Founder, FAQ, Contact.
-- Light and dark themes with a persisted preference (no flash on load) and a smooth switch.
+- Pure-white preloader that animates the **original logo file** in slices (once per session; progress follows real font/page readiness).
+- Hero with a custom prism-and-rays motion graphic (each ray links to its service) and scroll-linked transitions.
+- Sections: About (scroll-driven swoosh scene, mission/vision/values), Founder (hidden until supplied), Services (grouped interactive explorer), Why Prism (pinned rotating ring on desktop, connected story on mobile), Industries (editorial index + animated scenes), Approach (pinned five-scene process on desktop, vertical sequence on mobile), FAQ (topic filters), Contact, and a closing scene footer.
+- Light theme by default, with a designed dark theme. The preference is persisted (no flash on load) and every section follows it.
+- Floating WhatsApp assistant: a robot-and-telephone scene that opens on hover (desktop) or tap (touch), with an optional, opt-in telephone sound (off by default, never autoplays).
 - Responsive navigation: services dropdown on desktop, animated full-screen menu on mobile.
 - Contact form with client-side validation, loading, error and success states. Submission goes through one isolated handler.
-- Floating WhatsApp button with a pre-filled message (number configurable).
 - SEO: metadata, Open Graph / Twitter images, favicon, sitemap, robots, JSON-LD (Organization, FAQ).
 - Accessibility: semantic landmarks, keyboard-operable menus and accordions, visible focus, `prefers-reduced-motion` support.
 - Testimonials and an announcement popup are built but **hidden until real content is supplied**.
@@ -70,12 +70,11 @@ Copy `.env.example` to `.env.local`. Every variable is optional; unset values re
 | Variable                       | Purpose                                                                                   |
 | ------------------------------ | ----------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`         | Canonical origin (no trailing slash). Drives canonical URLs, sitemap, Open Graph.          |
-| `NEXT_PUBLIC_CONTACT_EMAIL`    | Shown in contact section and footer.                                                      |
+| `NEXT_PUBLIC_CONTACT_EMAIL`    | Overrides the confirmed default (`prismsolutions.pvt@gmail.com`) in `config/site.ts`.      |
 | `NEXT_PUBLIC_CONTACT_PHONE`    | Shown in contact section and footer.                                                      |
 | `NEXT_PUBLIC_CONTACT_ADDRESS`  | Office address. Leave blank until the client confirms a location.                          |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER`  | Digits only, international format. Blank = WhatsApp opens with a contact chooser.          |
-| `NEXT_PUBLIC_INSTAGRAM_URL`    | Instagram profile link.                                                                   |
-| `NEXT_PUBLIC_LINKEDIN_URL`     | LinkedIn page link.                                                                       |
+| `NEXT_PUBLIC_INSTAGRAM_URL`    | Instagram profile link. Blank = no Instagram link is shown.                               |
 | `NEXT_PUBLIC_ENQUIRY_ENDPOINT` | URL that receives enquiry POSTs. Blank = form runs in **preview mode** (nothing is sent). |
 
 `NEXT_PUBLIC_*` values are embedded in the client bundle and are therefore public. Put real secrets (API keys, database URLs) in **non-prefixed** variables and read them only in server code.
@@ -104,16 +103,18 @@ src/
 │   ├── apple-icon.tsx        # Apple touch icon
 │   └── icon.svg              # Favicon
 ├── components/
-│   ├── layout/               # Site chrome: Navbar, Footer, WhatsAppFab, AnnouncementModal, LegalShell
+│   ├── layout/               # Site chrome: Navbar, Footer (closing scene), WhatsAppWidget + RobotScene, AnnouncementModal, LegalShell
 │   ├── motion/               # Animation infrastructure: Preloader, MotionRoot, Magnetic
 │   ├── sections/             # One folder per homepage section (see below)
-│   └── ui/                   # Small reusable primitives: Logo, Split, ThemeToggle, SocialIcons
+│   └── ui/                   # Small reusable primitives: BrandLogo (exact logo), Split, ThemeToggle, SocialIcons
+├── config/site.ts            # CENTRAL SETTINGS: company, contact, social, WhatsApp (env-driven; admin-ready shape)
 ├── content/                  # All editable copy and data, one file per topic (CMS-ready)
-├── hooks/                    # Reusable React hooks (useNavScroll, useEscapeKey)
-├── lib/                      # config (env-driven), enquiry handler, gsap setup, motion helpers
+├── hooks/                    # Reusable React hooks (useNavScroll, useEscapeKey, useActiveSection)
+├── lib/                      # enquiry handler, gsap setup, motion helpers, ring sound
 ├── styles/globals.css        # Design tokens (CSS variables), base styles, shared utilities
 └── types/                    # Shared TypeScript types (content, enquiry)
-public/brand/                 # Brand assets (original logo raster)
+public/brand/                 # prism-logo.jpg = the EXACT logo from the company portfolio (do not edit or re-export)
+docs/                         # Source documents (company portfolio DOCX — the source of truth for content)
 ```
 
 Each folder under `components/sections/` holds a section and anything used only by it, for example `services/Services.tsx` + `services/ServiceGlyph.tsx`. Sections are re-exported from `components/sections/index.ts`.
@@ -122,18 +123,23 @@ Each folder under `components/sections/` holds a section and anything used only 
 
 Copy lives in `src/content/` and is imported through `@/content`. Components never contain marketing copy of their own, so a CMS or admin API can later replace these modules with fetched data.
 
-| File                                | Controls                                         |
-| ----------------------------------- | ------------------------------------------------ |
-| `services.ts`                       | The seven services (names, summaries, sub-services, hero ray labels) |
-| `about.ts`                          | Who-we-are copy, mission/vision, principles       |
-| `why.ts` `approach.ts` `faq.ts`     | Why Prism, five-stage approach, FAQ               |
-| `industries.ts`                     | Industries and how Prism can help                 |
-| `founder.ts`                        | Founder name, designation, message, photo (placeholder until supplied) |
-| `testimonials.ts`                   | Approved testimonials. Empty array = section hidden |
-| `announcement.ts`                   | Announcement popup. `enabled: false` by default   |
-| `cta.ts`                            | Closing call to action                            |
+| File                                | Controls                                                          |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `hero.ts`                           | Hero headline, supporting text, CTAs                              |
+| `about.ts`                          | Overview, mission, vision, four positioning pillars, core values  |
+| `services.ts`                       | The seven services, their groups, summaries and capabilities      |
+| `why.ts` `approach.ts`              | The eight reasons and the five-stage delivery process             |
+| `industries.ts`                     | Industries (potential fit only) and compliance notes              |
+| `faq.ts`                            | FAQ topics and questions                                          |
+| `cta.ts`                            | Contact headline and the five service commitments (closing scene) |
+| `founder.ts`                        | Founder name, designation, message, photo. **Section stays hidden until name and message are filled in** |
+| `testimonials.ts`                   | Approved testimonials. Empty array = section hidden                |
+| `announcement.ts`                   | Announcement popup. `enabled: false` by default                   |
 
-Contact details, social links and the WhatsApp number come from environment variables via `src/lib/config.ts`.
+**Source of truth:** the company portfolio in `docs/Prism_Solutions_Company_Portfolio.docx`. Content must match it; do not add services, claims, clients, statistics or certifications that it does not contain.
+
+Company, contact and social values live in **one place**: `src/config/site.ts` (the `settings` object, typed as `SiteSettings`). It is built from confirmed defaults plus `NEXT_PUBLIC_*` overrides, and is the shape the admin panel will manage later (email, phone, office address, WhatsApp number, Instagram URL). Components never hardcode these values.
+
 
 ## Design system
 
@@ -141,10 +147,10 @@ Tokens are CSS variables in `src/styles/globals.css`, exposed to Tailwind in `ta
 
 - Navy `#0B1F4B` (wordmark), orange `#F28A1E` (arc), amber `#F7A83B` (star).
 - `:root` defines the light theme; `:root[data-theme="dark"]` the dark theme.
-- `.surface-night` forces the dark palette on a section in either theme (hero, industries, contact, footer), which gives the page its light/dark rhythm.
+- Light is the default theme (a saved preference wins). Every section uses the tokens, so both themes are designed rather than inverted. `.surface-day` forces the light palette (used only by the white preloader).
 - Typography roles: `font-display` (headlines), `font-sans` (body), `font-mono` (labels). Utility classes `.wrap`, `.eyebrow`, `.h-display`, `.btn`, `.btn-primary`, `.btn-ghost`, `.link-u` are defined once in the globals.
 
-To re-skin the site, change the variables, not individual components. The logo is a vector re-creation (`components/ui/Logo.tsx`); the original raster is kept at `public/brand/logo-source.webp`. Replace both when final artwork is supplied.
+To re-skin the site, change the variables, not individual components. The logo is the **exact original file** from the company portfolio (`public/brand/prism-logo.jpg`), rendered by `components/ui/BrandLogo.tsx` (never cropped or recreated; in dark mode it sits on a white plate because the artwork has a white background). The preloader animates the same file by clipping it into regions (`motion/Preloader.tsx`), so if the logo artwork ever changes, re-measure those regions.
 
 ## Animation architecture
 
@@ -187,7 +193,7 @@ npm start        # serve the production build locally
 
 The app is a standard Next.js app with no server-only requirements today, so it deploys to any Next-capable host. On **Vercel** or **Netlify**, import the repository, keep the default build command (`npm run build`), and set the environment variables above in the host dashboard. Set `NEXT_PUBLIC_SITE_URL` to the real domain so canonical URLs, the sitemap and Open Graph images are correct (WhatsApp/Instagram previews need absolute URLs).
 
-Before launch, confirm with the client: logo artwork (replace the vector mark and `public/brand/logo-source.webp`), headquarters/contact details, WhatsApp number, social URLs, mission/vision wording, founder content, and final Privacy Policy and Terms (the current pages are placeholders).
+Before launch, confirm with the client: the logo file in `public/brand/prism-logo.jpg` (a vector/transparent version would be ideal), the office city/state and phone number, WhatsApp number, social URLs, the founder name, designation, photo and message (the section stays hidden until supplied), and final Privacy Policy and Terms (the current pages are placeholders).
 
 ## Content integrity rules
 

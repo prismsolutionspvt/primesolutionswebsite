@@ -1,76 +1,60 @@
 import type { Industry } from "@/types";
 
+/**
+ * Source: portfolio section 08. These are potential areas of service fit only.
+ * They do NOT imply existing client engagements or specialist certifications.
+ */
+export const industriesIntro = {
+  eyebrow: "Industries",
+  heading: "Where our services fit.",
+  text: "Our service mix is relevant to a range of organisations. The exact scope is adapted to each industry's workflows, customer expectations and compliance requirements.",
+  disclaimer:
+    "Industry examples indicate potential areas of service fit and do not imply existing client engagements or specialist certifications.",
+};
+
 export const industries: Industry[] = [
-  {
-    id: "ecommerce",
-    name: "E-commerce & Retail",
-    blurb:
-      "Online shops and retailers compete on visibility and on how customers feel after they click buy.",
-    help: [
-      "Social, search and paid campaigns that bring relevant shoppers to the store",
-      "Order and product enquiry handling for customers",
-      "Outbound follow-ups to keep customers engaged",
-    ],
-    art: "grid",
-  },
-  {
-    id: "real-estate",
-    name: "Real Estate & Property Services",
-    blurb:
-      "Property businesses live on timely conversations with buyers, sellers and tenants.",
-    help: [
-      "Lead research and qualification for listings and developments",
-      "Viewing and appointment scheduling",
-      "Content and design for property marketing",
-    ],
-    art: "roofs",
-  },
   {
     id: "healthcare",
     name: "Healthcare & Wellness",
-    blurb:
-      "Clinics and wellness providers need approachable communication and well-organised administration.",
-    help: [
-      "Appointment scheduling and reminders",
-      "Enquiry handling for prospective patients and clients",
-      "Records, documentation and data management support",
-    ],
-    art: "pulse",
+    summary: "Administrative coordination and patient-facing communication.",
+    services: ["Administrative coordination", "Appointment support", "Customer enquiry handling"],
+    note: "Subject to client policies and applicable privacy requirements.",
+    scene: "healthcare",
   },
   {
-    id: "education",
-    name: "Education & Training",
-    blurb:
-      "Institutions and training providers need to reach learners and guide them from interest to enrolment.",
-    help: [
-      "Prospect outreach and enquiry follow-up",
-      "Campaign support for intake periods",
-      "Administrative and data support for enrolment processes",
-    ],
-    art: "lines",
+    id: "real-estate",
+    name: "Real Estate",
+    summary: "Staying responsive to buyers, sellers and tenants.",
+    services: ["Lead research", "Enquiry handling", "Appointment coordination", "Marketing support"],
+    scene: "realestate",
   },
   {
-    id: "technology",
-    name: "Technology & Professional Services",
-    blurb:
-      "Specialist firms need a steady pipeline of qualified conversations with the right decision-makers.",
-    help: [
-      "B2B prospect research and outreach",
-      "Appointment setting for sales and consulting teams",
-      "Brand, website and content support",
-    ],
-    art: "nodes",
+    id: "ecommerce",
+    name: "E-commerce & Retail",
+    summary: "Supporting customers and promoting products online.",
+    services: ["Customer support", "Order-related enquiry routing", "Product promotion", "Digital marketing support"],
+    scene: "ecommerce",
   },
   {
-    id: "local-services",
-    name: "Home Services & Local Businesses",
-    blurb:
-      "Local businesses win on being easy to find, easy to reach and quick to respond.",
-    help: [
-      "Local visibility through search and social media",
-      "Call handling and customer follow-up",
-      "Booking coordination and admin support",
-    ],
-    art: "arches",
+    id: "saas",
+    name: "SaaS & Technology",
+    summary: "Filling the pipeline and helping new customers get started.",
+    services: ["Lead generation", "Appointment setting", "Customer onboarding assistance", "Business development support"],
+    scene: "saas",
+  },
+  {
+    id: "professional-services",
+    name: "Professional Services",
+    summary: "Keeping outreach, administration and communication organised.",
+    services: ["Prospect research", "Administrative support", "Client communication", "Marketing coordination"],
+    scene: "professional",
+  },
+  {
+    id: "finance-insurance",
+    name: "Finance & Insurance",
+    summary: "Non-advisory administrative and customer support activities.",
+    services: ["Administrative support activities", "Customer support activities"],
+    note: "Non-advisory only, subject to applicable regulatory and client controls.",
+    scene: "finance",
   },
 ];
