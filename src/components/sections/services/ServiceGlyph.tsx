@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ICON_MAP } from "@/lib/icons";
 
 /** Original line-graphics per service. Each stroke draws in via the .glyph CSS animation (remount to replay). */
 const A = "rgb(var(--accent))";
@@ -95,10 +96,25 @@ const art: Record<string, ReactNode> = {
   ),
 };
 
-export function ServiceGlyph({ id, className = "" }: { id: string; className?: string }) {
+/** Services added in the admin panel have no hand-drawn illustration: they get concentric rings around the icon the owner picked. */
+function Fallback({ icon }: { icon?: string }) {
+  const Icon = (icon && ICON_MAP[icon]) || ICON_MAP.star;
+  return (
+    <>
+      <P d="M160 24 a96 96 0 1 0 0.1 0Z" o={0.28} i={0} />
+      <P d="M160 52 a68 68 0 1 0 0.1 0Z" o={0.5} i={1} />
+      <P d="M60 120 H100 M220 120 H260" c={A} w={2.6} i={3} />
+      <Dot x={60} y={120} i={4} />
+      <Dot x={260} y={120} i={4} />
+      <Icon x={126} y={86} width={68} height={68} stroke={A} strokeWidth={1.6} />
+    </>
+  );
+}
+
+export function ServiceGlyph({ id, icon, className = "" }: { id: string; icon?: string; className?: string }) {
   return (
     <svg viewBox="0 0 320 240" className={`glyph ${className}`} aria-hidden fill="none">
-      {art[id]}
+      {art[id] ?? <Fallback icon={icon} />}
     </svg>
   );
 }

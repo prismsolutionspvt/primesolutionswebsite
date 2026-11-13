@@ -23,3 +23,6 @@ Thumbs.db
 
 # client source documents stay local (the DOCX metadata contains a personal email address)
 docs/*.docx
+
+# generated SQL bundle (npm run db:bundle)
+supabase/_bundle.sql

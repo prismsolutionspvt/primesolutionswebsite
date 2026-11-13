@@ -8,14 +8,24 @@ type Props = {
   height?: number;
   priority?: boolean;
   className?: string;
+  /** Owner-uploaded logo URL (Admin → Website Appearance). Empty = the original artwork. */
+  src?: string;
 };
 
 /**
  * The EXACT original Prism Solutions logo (extracted from the company portfolio), uncropped.
  * The artwork has a white background, so in dark mode it sits on a white plate to stay fully legible.
  */
-export function BrandLogo({ height = 48, priority = false, className = "" }: Props) {
+export function BrandLogo({ height = 48, priority = false, className = "", src }: Props) {
   const width = Math.round((height * LOGO.width) / LOGO.height);
+  if (src) {
+    return (
+      <span className={`logo-plate inline-flex shrink-0 items-center ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="Company logo" style={{ height, width: "auto" }} className="block select-none mix-blend-multiply" draggable={false} decoding="async" />
+      </span>
+    );
+  }
   return (
     <span className={`logo-plate inline-flex shrink-0 items-center ${className}`}>
       <Image

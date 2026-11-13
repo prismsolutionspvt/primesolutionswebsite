@@ -84,7 +84,7 @@ export function TeamCard({ member, index }: { member: TeamMember; index: number 
           <div aria-hidden className="mx-0 mt-3 h-3 w-2/5 rounded-full bg-accent/25 md:mx-auto" />
         )}
         {filled(member.description) ? (
-          <p className="mx-auto mt-4 max-w-[34ch] text-[0.98rem] leading-relaxed text-muted">{member.description}</p>
+          <p className="mx-auto mt-4 max-w-[34ch] whitespace-pre-line text-[0.98rem] leading-relaxed text-muted">{member.description}</p>
         ) : (
           <div aria-hidden className="mx-auto mt-5 space-y-2.5">
             <div className="h-2.5 w-full rounded-full bg-ink/[0.07]" />

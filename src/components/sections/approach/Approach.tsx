@@ -1,17 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { adaptiveProps } from "@/config/adaptive";
-import { approach } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { registerGsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { Split } from "@/components/ui/Split";
 import { ApproachScene } from "./ApproachScene";
 
-const N = approach.stages.length;
-
 /** Desktop: the section pins and scroll moves a beam through five connected scenes.
  *  Mobile: a connected vertical sequence where each scene draws as it enters the screen. */
 export function Approach() {
+  const { approach } = useContent();
+  const N = approach.stages.length;
   const [step, setStep] = useState(0);
   const [seen, setSeen] = useState<boolean[]>(() => Array(N).fill(false));
   const pin = useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ export function Approach() {
       };
     });
     return () => mm.revert();
-  }, []);
+  }, [N]);
 
   // desktop: wipe + rise on each stage change
   useEffect(() => {

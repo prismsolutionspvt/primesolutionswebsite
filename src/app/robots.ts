@@ -1,10 +1,13 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/config/site";
+import { getSiteContent } from "@/lib/content/fetch";
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const { settings } = await getSiteContent();
+  const url = settings.company.url;
+  // "Search engine indexing" is an owner setting (Admin → Website Appearance). The admin area is never indexed.
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/"] }],
-    sitemap: `${site.url}/sitemap.xml`,
-    host: site.url,
+    rules: settings.seo.indexable ? [{ userAgent: "*", allow: "/", disallow: ["/admin", "/auth", "/api/"] }] : [{ userAgent: "*", disallow: "/" }],
+    sitemap: `${url}/sitemap.xml`,
+    host: url,
   };
 }

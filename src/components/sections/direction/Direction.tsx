@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { adaptiveProps } from "@/config/adaptive";
-import { direction } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { registerGsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { ScrollWords } from "@/components/ui/ScrollWords";
@@ -15,6 +15,7 @@ const STAR = "M0 -22 Q2.6 -2.6 22 0 Q2.6 2.6 0 22 Q-2.6 2.6 -22 0 Q-2.6 -2.6 0 -
  * The company-approved wording is revealed word by word as it is read.
  */
 export function Direction() {
+  const { direction } = useContent();
   const root = useRef<HTMLElement>(null);
 
   useEffect(() => {

@@ -2,7 +2,7 @@
 import { useState, type PointerEvent } from "react";
 import { Plus } from "lucide-react";
 import { adaptiveProps } from "@/config/adaptive";
-import { values, valuesIntro } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { Split } from "@/components/ui/Split";
 import { ValueGlyph } from "./ValueGlyph";
 
@@ -17,6 +17,7 @@ const glow = (e: PointerEvent<HTMLElement>) => {
  * its line-graphic redraws, the word enlarges and a light follows the pointer. Strictly the portfolio's five values.
  */
 export function Values() {
+  const { values, valuesIntro } = useContent();
   const [active, setActive] = useState(0);
   const hoverable = () => window.matchMedia("(hover: hover) and (min-width: 1024px)").matches;
 

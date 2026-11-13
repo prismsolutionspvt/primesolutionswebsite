@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { registerGsap, whenReady } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { adaptiveProps } from "@/config/adaptive";
-import { hero, services } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { Split } from "@/components/ui/Split";
 import { Magnetic } from "@/components/motion/Magnetic";
 
@@ -16,10 +16,13 @@ const ENTRY = [253, 262];
 const EXIT_X = 338;
 const EXIT_Y = 262;
 const RAY_X = 566;
-const rayEnds = services.map((_, i) => 44 + i * ((H - 88) / (services.length - 1)));
+/** One ray per published service, spread evenly down the right edge (works for any number of services). */
+const rayEndsFor = (n: number) => Array.from({ length: n }, (_, i) => (n === 1 ? H / 2 : 44 + i * ((H - 88) / (n - 1))));
 const rayPath = (y: number) => `M${EXIT_X} ${EXIT_Y} C ${EXIT_X + 90} ${EXIT_Y}, ${RAY_X - 140} ${y}, ${RAY_X} ${y}`;
 
 export function Hero() {
+  const { hero, services } = useContent();
+  const rayEnds = rayEndsFor(services.length);
   const root = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -149,7 +152,7 @@ export function Hero() {
             viewBox={`0 0 ${W} ${H}`}
             className="hero-svg mx-auto h-auto w-full max-w-[660px] overflow-visible lg:max-w-none"
             role="group"
-            aria-label="One beam of business need enters the Prism and separates into seven services. Select a service to read more."
+            aria-label={`One beam of business need enters the Prism and separates into ${services.length} services. Select a service to read more.`}
           >
             <defs>
               <linearGradient id="beamIn" gradientUnits="userSpaceOnUse" x1="10" y1="0" x2="253" y2="0">

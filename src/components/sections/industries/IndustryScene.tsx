@@ -10,6 +10,8 @@ type SceneProps = { tone: string };
 const common = { strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
 const scenes: Record<IndustrySceneKind, (p: SceneProps) => ReactNode> = {
+  /** owner-created industries without a dedicated illustration reuse the neutral professional scene */
+  generic: (p) => scenes.professional(p),
   healthcare: ({ tone }) => (
     <>
       <g data-layer="1" fill="none" stroke={tone} strokeOpacity=".35" strokeWidth="2">

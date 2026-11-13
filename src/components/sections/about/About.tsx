@@ -1,10 +1,11 @@
 import { adaptiveProps } from "@/config/adaptive";
-import { about } from "@/content";
+import { getSiteContent } from "@/lib/content/fetch";
 import { Split } from "@/components/ui/Split";
 import { AboutScene } from "./AboutScene";
 
 /** Company overview (portfolio section 01) with the scroll-driven positioning scene. Mission, vision and values follow as their own scenes. */
-export function About() {
+export async function About() {
+  const { about } = await getSiteContent();
   return (
     <section id="about" {...adaptiveProps("about")} className="relative py-20 sm:py-28 lg:py-36">
       <div className="wrap">

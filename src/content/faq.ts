@@ -1,4 +1,6 @@
-import type { Faq, FaqCategoryId } from "@/types";
+import type { Faq } from "@/types";
+
+type FaqCategoryId = "services" | "engagement" | "start";
 
 /**
  * Answers are drawn only from the company portfolio. No availability, language, volume, certification or results claims.

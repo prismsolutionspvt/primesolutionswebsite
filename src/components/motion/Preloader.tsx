@@ -4,6 +4,7 @@ import { registerGsap, READY_EVENT } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { LOGO } from "@/components/ui/BrandLogo";
 import { PoweredBy } from "@/components/ui/PoweredBy";
+import { useContent } from "@/components/providers/ContentProvider";
 
 /* The preloader animates the ORIGINAL logo file. The same image is stacked in five layers, each clipped
    to one region of the artwork (measured from the file), so no part of the logo is redrawn or altered.
@@ -42,6 +43,7 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2
  * On exit the logo flies into the navigation bar's logo, then the white screen dissolves.
  */
 export function Preloader() {
+  const { credit } = useContent().settings;
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -226,7 +228,7 @@ export function Preloader() {
       </div>
 
       <div data-credit className="relative pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
-        <PoweredBy />
+        <PoweredBy label={credit.label} href={credit.href} />
       </div>
     </div>
   );

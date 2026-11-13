@@ -1,10 +1,11 @@
 import { adaptiveProps } from "@/config/adaptive";
-import { team, teamIntro } from "@/content";
+import { getSiteContent } from "@/lib/content/fetch";
 import { Split } from "@/components/ui/Split";
 import { TeamCard } from "./TeamCard";
 
-/** "Meet the People Behind Prism" — three profile slots, fed entirely by `content/team.ts` (admin-ready). */
-export function Team() {
+/** "Meet the People Behind Prism" — three profile slots, fed by Admin → Team Management. */
+export async function Team() {
+  const { team, teamIntro } = await getSiteContent();
   return (
     <section id="team" {...adaptiveProps("team")} className="relative overflow-hidden py-20 sm:py-28 lg:py-36">
       {/* swoosh echoing the logo, drawn once as the section enters */}

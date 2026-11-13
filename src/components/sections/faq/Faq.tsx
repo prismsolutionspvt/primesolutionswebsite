@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { adaptiveProps } from "@/config/adaptive";
-import { faqCategories, faqIntro, faqs } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
+import { slugify } from "@/lib/slug";
 import { Split } from "@/components/ui/Split";
 import { PointerGlow } from "@/components/layout/PointerGlow";
-import type { FaqCategoryId } from "@/types";
 
 /**
  * FAQ with real interaction: topic filters with a sliding indicator, rows that light up on hover
@@ -12,9 +12,10 @@ import type { FaqCategoryId } from "@/types";
  * a cursor-following glow across the list, and arrow-key navigation between questions.
  */
 export function Faq() {
-  const [cat, setCat] = useState<FaqCategoryId | "all">("all");
+  const { faqCategories, faqIntro, faqs } = useContent();
+  const [cat, setCat] = useState<string>("all");
   const [open, setOpen] = useState<number>(0);
-  const list = useMemo(() => faqs.filter((f) => cat === "all" || f.category === cat), [cat]);
+  const list = useMemo(() => faqs.filter((f) => cat === "all" || slugify(f.category) === cat), [cat, faqs]);
 
   // sliding indicator behind the active topic chip
   const chips = useRef<HTMLDivElement>(null);
@@ -29,7 +30,7 @@ export function Faq() {
     return () => window.removeEventListener("resize", measure);
   }, [cat]);
 
-  const pick = (id: FaqCategoryId | "all") => {
+  const pick = (id: string) => {
     setCat(id);
     setOpen(0);
   };
@@ -52,7 +53,7 @@ export function Faq() {
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
-          }),
+          }).replace(/</g, "\\u003c"), // owner-written text must never be able to close the script tag
         }}
       />
       <div className="wrap grid gap-12 lg:grid-cols-12 lg:gap-12">

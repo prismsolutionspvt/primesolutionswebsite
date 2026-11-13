@@ -1,10 +1,12 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/config/site";
+import { getSiteContent } from "@/lib/content/fetch";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { settings } = await getSiteContent();
+  if (!settings.seo.indexable) return [];
   const now = new Date();
   return ["", "/privacy", "/terms"].map((p) => ({
-    url: `${site.url}${p}`,
+    url: `${settings.company.url}${p}`,
     lastModified: now,
     changeFrequency: p ? "yearly" : "monthly",
     priority: p ? 0.3 : 1,

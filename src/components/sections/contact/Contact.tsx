@@ -1,7 +1,8 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 import { adaptiveProps } from "@/config/adaptive";
-import { site, whatsappLink } from "@/config/site";
-import { cta } from "@/content";
+import { buildWhatsappLink } from "@/config/site";
+import { getSiteContent } from "@/lib/content/fetch";
+import { SocialLinkIcon } from "@/components/ui/SocialLinkIcon";
 import { Split } from "@/components/ui/Split";
 import { ContactCard } from "@/components/ui/ContactCard";
 import { InstagramIcon, WhatsappIcon } from "@/components/ui/SocialIcons";
@@ -17,8 +18,9 @@ const STARS: [number, number, number, string][] = [
 ];
 
 /** Closing call to action and contact in one place. Every contact value comes from `config/site.ts` (admin-managed later). */
-export function Contact() {
-  const { email, phone, address } = site.contact;
+export async function Contact() {
+  const { settings, cta } = await getSiteContent();
+  const { email, phone, address } = settings.contact;
 
   return (
     <section id="contact" {...adaptiveProps("contact")} className="relative isolate overflow-hidden py-20 sm:py-28 lg:py-36">
@@ -53,18 +55,25 @@ export function Contact() {
             <ContactCard icon={Phone} label="Phone" value={phone} href={phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : undefined} copy emptyText="Phone number coming soon" />
           </div>
           <div className="mt-3" data-fade>
-            <ContactCard icon={MapPin} label="Location" value={address || site.locationLabel} />
+            <ContactCard icon={MapPin} label="Location" value={address || settings.company.locationLabel} />
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3" data-fade>
-            <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="btn btn-ghost !min-h-[44px]">
-              <WhatsappIcon className="h-5 w-5 text-[#25D366]" /> WhatsApp us
-            </a>
-            {site.social.instagram && (
-              <a href={site.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Prism Solutions on Instagram" className="btn btn-ghost !min-h-[44px] !w-[44px] !px-0">
+            {settings.whatsapp.enabled && (
+              <a href={buildWhatsappLink(settings.whatsapp)} target="_blank" rel="noopener noreferrer" className="btn btn-ghost !min-h-[44px]">
+                <WhatsappIcon className="h-5 w-5 text-[#25D366]" /> WhatsApp us
+              </a>
+            )}
+            {settings.social.instagramUrl && (
+              <a href={settings.social.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Prism Solutions on Instagram" className="btn btn-ghost !min-h-[44px] !w-[44px] !px-0">
                 <InstagramIcon className="h-5 w-5" />
               </a>
             )}
+            {settings.social.links.map((l) => (
+              <a key={l.id} href={l.url} target="_blank" rel="noopener noreferrer" aria-label={l.label} className="btn btn-ghost !min-h-[44px] !w-[44px] !px-0">
+                <SocialLinkIcon platform={l.platform} />
+              </a>
+            ))}
           </div>
         </div>
 

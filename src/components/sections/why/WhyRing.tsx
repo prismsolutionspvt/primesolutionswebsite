@@ -25,7 +25,7 @@ export function WhyRing({ count, active, onSelect, labels, className = "h-auto w
   };
 
   return (
-    <svg viewBox="0 0 520 520" className={className} role="group" aria-label="Eight reasons to choose Prism Solutions">
+    <svg viewBox="0 0 520 520" className={className} role="group" aria-label={`${count} reasons to choose Prism Solutions`}>
       <circle cx={C} cy={C} r={R} fill="none" stroke="rgb(var(--ink))" strokeOpacity=".14" strokeWidth="1.5" />
       <circle cx={C} cy={C} r={R - 52} fill="none" stroke="rgb(var(--ink))" strokeOpacity=".1" strokeDasharray="2 8" />
       <circle cx={C} cy={C} r={R + 36} fill="none" stroke="rgb(var(--accent))" strokeOpacity=".18" strokeWidth="1.5" />

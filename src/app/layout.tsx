@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Manrope, JetBrains_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import { site } from "@/config/site";
+import { getSiteContent } from "@/lib/content/fetch";
 
 const display = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -12,26 +12,25 @@ const display = Bricolage_Grotesque({
 const body = Manrope({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
-const title = "Prism Solutions | BPO & Digital Services";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: { default: title, template: "%s | Prism Solutions" },
-  description: site.description,
-  applicationName: site.name,
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: site.name,
-    title,
-    description: site.description,
-    locale: "en_US",
-  },
-  twitter: { card: "summary_large_image", title, description: site.description },
-  robots: { index: true, follow: true },
-  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }], apple: "/apple-icon" },
-};
+/** Title, description, share image, favicon and indexing are all editable in Admin → Website Appearance. */
+export async function generateMetadata(): Promise<Metadata> {
+  const { settings } = await getSiteContent();
+  const { seo, company } = settings;
+  const og = seo.ogImageUrl ? [{ url: seo.ogImageUrl, alt: company.name }] : undefined;
+  return {
+    metadataBase: new URL(company.url),
+    title: { default: seo.title, template: `%s | ${company.name}` },
+    description: seo.description,
+    applicationName: company.name,
+    alternates: { canonical: "/" },
+    openGraph: { type: "website", url: "/", siteName: company.name, title: seo.title, description: seo.description, locale: "en_US", ...(og ? { images: og } : {}) },
+    twitter: { card: "summary_large_image", title: seo.title, description: seo.description, ...(og ? { images: og.map((i) => i.url) } : {}) },
+    robots: seo.indexable ? { index: true, follow: true } : { index: false, follow: false },
+    icons: settings.brand.faviconUrl
+      ? { icon: [{ url: settings.brand.faviconUrl }], apple: "/apple-icon" }
+      : { icon: [{ url: "/icon.svg", type: "image/svg+xml" }], apple: "/apple-icon" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#FFFFFF",
@@ -40,19 +39,22 @@ export const viewport: Viewport = {
 };
 
 /**
- * Runs before first paint: Light by default for first-time visitors (a saved Light/Dark/Adaptive choice wins),
- * a "js" flag, and the first-visit preloader flag — so there is no flash of the wrong theme or content.
+ * Runs before first paint: the owner's default theme for first-time visitors (a saved Light/Dark/Adaptive choice
+ * wins), a "js" flag, and the first-visit preloader flag (public pages only; the admin has no preloader).
+ * `fallback` is one of three fixed strings validated in the database and in the mapper, never free text.
  */
-const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');
-var t='light';try{var s=localStorage.getItem('prism-theme');if(s==='dark'||s==='light'||s==='adaptive')t=s}catch(e){}
+const bootScript = (fallback: string) => `(function(){var d=document.documentElement;d.classList.add('js');
+var t='${fallback}';try{var s=localStorage.getItem('prism-theme');if(s==='dark'||s==='light'||s==='adaptive')t=s}catch(e){}
 d.dataset.theme=t;
-try{if(!sessionStorage.getItem('prism-seen')){d.classList.add('is-preloading')}}catch(e){}})();`;
+try{if(!/^\\/(admin|auth)/.test(location.pathname)&&!sessionStorage.getItem('prism-seen')){d.classList.add('is-preloading')}}catch(e){}})();`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { settings } = await getSiteContent();
+  const theme = settings.theme.defaultTheme;
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="en" data-theme={theme} suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+        <script dangerouslySetInnerHTML={{ __html: bootScript(theme) }} />
         <link rel="preload" as="image" href="/brand/prism-logo.jpg" />
         <noscript>
           <style>{`.preloader{display:none!important}html.is-preloading,html.is-preloading body{overflow:auto!important}`}</style>

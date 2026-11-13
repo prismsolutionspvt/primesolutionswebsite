@@ -63,7 +63,7 @@ const art: ReactNode[] = [
 export function ValueGlyph({ index, className = "" }: { index: number; className?: string }) {
   return (
     <svg viewBox="0 0 240 200" className={`glyph ${className}`} aria-hidden fill="none">
-      {art[index]}
+      {art[index % art.length]}
     </svg>
   );
 }

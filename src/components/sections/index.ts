@@ -7,6 +7,6 @@ export { Services } from "./services/Services";
 export { Why } from "./why/Why";
 export { Industries } from "./industries/Industries";
 export { Approach } from "./approach/Approach";
-export { Testimonials } from "./testimonials/Testimonials";
+export { Reviews } from "./reviews/Reviews";
 export { Faq } from "./faq/Faq";
 export { Contact } from "./contact/Contact";

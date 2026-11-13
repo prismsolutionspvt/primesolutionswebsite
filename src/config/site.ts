@@ -62,5 +62,11 @@ export const navLinks = [
   { label: "Contact", href: "/#contact", id: "contact" },
 ] as const;
 
-/** Attribution link shown at the bottom of the site. */
+/** WhatsApp deep link from the admin-managed settings (`number` = digits only incl. country code; "" opens the chooser). */
+export function buildWhatsappLink(wa: { number: string; message: string }) {
+  const base = wa.number ? `https://wa.me/${wa.number}` : "https://wa.me/";
+  return `${base}?text=${encodeURIComponent(wa.message)}`;
+}
+
+/** Attribution link shown at the bottom of the site (defaults; the live value comes from Admin → Website Appearance). */
 export const poweredBy = { label: "FRX Technologies", href: "https://frxtechnologiesprv.netlify.app/" } as const;

@@ -2,7 +2,9 @@
 
 Marketing website for **Prism Solutions**, a US-based Business Process Outsourcing (BPO) and Digital Services company. Built with the Next.js App Router, TypeScript, Tailwind CSS and GSAP.
 
-This repository is the **frontend phase**. There is no database, authentication or admin panel yet; the code is structured so those can be added without rewriting the site (see [Preparing for the backend and admin panel](#preparing-for-the-backend-and-admin-panel)).
+This repository now contains the **website, the Supabase backend and the owner's admin panel**. Every piece of public content (services, industries, team, values, FAQs, reviews, announcements, contact details, footer, WhatsApp, theme defaults…) is managed from `/admin` and stored in Supabase. The original text in `src/content/` is kept as the starter content and as the fallback if the database is unreachable.
+
+**Read first:** [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) (what you must click in Supabase), [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) (how the owner-only lock works), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (how it fits together), [docs/TESTING.md](docs/TESTING.md) (what was actually tested, and what was not).
 
 ## Contents
 
@@ -18,7 +20,7 @@ This repository is the **frontend phase**. There is no database, authentication 
 - [Animation architecture](#animation-architecture)
 - [Interaction catalogue (hover effects)](#interaction-catalogue-hover-effects)
 - [Component conventions](#component-conventions)
-- [Preparing for the backend and admin panel](#preparing-for-the-backend-and-admin-panel)
+- [Backend and admin panel](#backend-and-admin-panel)
 - [Building and deploying](#building-and-deploying)
 - [Content integrity rules](#content-integrity-rules)
 
@@ -33,7 +35,9 @@ This repository is the **frontend phase**. There is no database, authentication 
 - Contact form with client-side validation, loading, error and success states, and one isolated submission handler.
 - SEO: metadata, Open Graph / Twitter images built from the exact logo, favicon, sitemap, robots, JSON-LD (Organization, FAQ).
 - Accessibility: semantic landmarks, keyboard-operable menus, tabs and accordions, visible focus, `prefers-reduced-motion` support.
-- Testimonials and the announcement popup are built but **hidden until real content is supplied**.
+- **Leave a review:** an interactive section (star-burst rating, a face that changes mood, a live preview, a confetti finish). Reviews arrive as *pending* and appear only after the owner approves them.
+- **Announcements:** an animated pop-up (a bottom sheet on phones) with scheduling, priority and "how often" rules, managed from the admin.
+- **Admin panel** at `/admin`: owner-only, with 17 modules (content, services with subcategories, industries, team, reviews, FAQs, announcements, enquiries inbox, media library, contact & social, appearance, settings).
 
 ## Tech stack
 
@@ -45,7 +49,9 @@ This repository is the **frontend phase**. There is no database, authentication 
 | Animation  | GSAP + ScrollTrigger (scroll/timeline), Framer Motion (UI transitions) |
 | Icons      | Lucide React (plus a few inline SVG brand icons)                |
 | Fonts      | `next/font/google` — Bricolage Grotesque, Manrope, JetBrains Mono |
-| Quality    | ESLint (`next/core-web-vitals`, `next/typescript`), `tsc`        |
+| Backend    | Supabase (PostgreSQL, Auth, Storage, Row Level Security) via `@supabase/ssr` |
+| Validation | Zod (public forms) + a shared field engine for the admin forms |
+| Quality    | ESLint (`next/core-web-vitals`, `next/typescript`), `tsc`, a Postgres security test suite |
 
 > **Version pins that matter:** `typescript` is pinned to 5.9 (TypeScript 7 is not supported by Next 15), and Tailwind to 3.4 (v4 relies on native binaries that some locked-down Windows setups block). Do not bump either without testing a production build.
 
@@ -65,19 +71,16 @@ The dev server runs at <http://localhost:5200>. The first load in a session show
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local`. Every variable is optional; unset values render as clear placeholders. **Never commit `.env*` files** (they are git-ignored; only `.env.example` is tracked).
+Copy `.env.example` to `.env.local`. **Never commit `.env*` files** (git-ignored; only `.env.example` is tracked).
 
-| Variable                       | Purpose                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`         | Canonical origin (no trailing slash). Drives canonical URLs, sitemap, Open Graph.          |
-| `NEXT_PUBLIC_CONTACT_EMAIL`    | Overrides the confirmed default (`prismsolutions.pvt@gmail.com`) in `config/site.ts`.      |
-| `NEXT_PUBLIC_CONTACT_PHONE`    | Phone number. Blank shows "Phone number coming soon".                                     |
-| `NEXT_PUBLIC_CONTACT_ADDRESS`  | Office address. Blank shows the confirmed location label ("United States").                |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER`  | Digits only, international format. Blank = WhatsApp opens with a contact chooser.          |
-| `NEXT_PUBLIC_INSTAGRAM_URL`    | Instagram profile link. Blank = no Instagram link is shown.                               |
-| `NEXT_PUBLIC_ENQUIRY_ENDPOINT` | URL that receives inquiry POSTs. Blank = form runs in **preview mode** (nothing is sent). |
+| Variable | Where it is used | Notes |
+| -------- | ---------------- | ----- |
+| `NEXT_PUBLIC_SUPABASE_URL` | browser + server | Your project URL. Public. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | browser + server | The *publishable* (anon) key. Designed to be public: what it can do is decided by Row Level Security. |
+| `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap | Only a fallback: the owner can set the site address in Admin → Website Appearance. |
+| `ADMIN_OWNER_EMAIL` | server only, optional | Only decides **to whom** the sign-in page sends a link. It never grants access. Defaults to `prismsolutions.pvt@gmail.com`. |
 
-`NEXT_PUBLIC_*` values are embedded in the client bundle and are therefore public. Put real secrets in **non-prefixed** variables and read them only in server code.
+There is **no service-role key** anywhere: the app never needs one and must never be given one. Unset Supabase variables are safe: the site renders its built-in content and the admin shows "not configured". Contact details, WhatsApp number, Instagram etc. are now edited in the admin, not in environment variables.
 
 ## Scripts
 
@@ -89,64 +92,52 @@ Copy `.env.example` to `.env.local`. Every variable is optional; unset values re
 | `npm run typecheck` | `tsc --noEmit`                                       |
 | `npm run lint`      | ESLint via `next lint`                               |
 | `npm run check`     | Typecheck + lint + build (run before opening a PR)   |
+| `npm run db:test`   | Run every migration + the seed in an in-process Postgres and attack the access rules (32 tests) |
+| `npm run db:seed:generate` | Rebuild `supabase/seed.sql` from `src/content` |
+| `npm run db:bundle` | Concatenate migrations + seed into one pasteable file (`supabase/_bundle.sql`) |
 
 ## Project structure
 
 ```
 src/
-├── app/                      # Routes, layout, metadata files (App Router)
-│   ├── layout.tsx            # Fonts, metadata, pre-paint boot script (theme, preloader flag)
-│   ├── page.tsx              # Homepage: composes sections in order
-│   ├── privacy/ terms/       # Placeholder legal pages
-│   ├── sitemap.ts robots.ts  # SEO files
-│   ├── opengraph-image.tsx   # 1200×630 social preview: the exact logo on white (also used for Twitter)
-│   ├── apple-icon.tsx        # Apple touch icon
-│   └── icon.svg              # Favicon
+├── app/
+│   ├── layout.tsx            # Fonts, metadata from settings, pre-paint theme script
+│   ├── (site)/               # PUBLIC site (page.tsx, privacy, terms) wrapped in <ContentProvider>
+│   ├── admin/                # login/ and (panel)/<module>/page.tsx: the owner's panel
+│   ├── auth/callback/        # one-time e-mail link landing; signs out anyone who is not the owner
+│   ├── api/admin/session/    # tells the public site whether to show the Admin link (boolean only)
+│   ├── actions/public.ts     # Server Actions for the public forms (review, enquiry)
+│   └── sitemap.ts robots.ts opengraph-image.tsx apple-icon.tsx icon.svg
+├── admin/                    # Admin engine: fields.ts (form definitions), registry.ts (every module), parse.ts (server validation),
+│   │                         #   data.ts (loaders), actions/ (content, media, enquiries, auth: all re-check the owner)
 ├── components/
-│   ├── layout/               # Site chrome: Navbar, Footer (+ marquee, commitments, glow), WhatsAppWidget + RobotScene, AnnouncementModal, LegalShell
-│   ├── motion/               # Animation infrastructure: Preloader, MotionRoot, ScrollProgress, Magnetic
-│   ├── sections/             # One folder per homepage section (hero, about, direction, values, team, services, why, industries, approach, testimonials, faq, contact)
-│   └── ui/                   # Reusable primitives: BrandLogo, Split, ScrollWords, ThemeSwitcher, PoweredBy, ContactCard, CopyButton, SocialIcons
-├── config/
-│   ├── site.ts               # CENTRAL SETTINGS: company, contact, social, WhatsApp, credit link (admin-ready shape)
-│   └── adaptive.ts           # Prism Adaptive: which tone each section takes (with the reasoning)
-├── content/                  # All editable copy and data, one file per topic (CMS-ready)
-├── hooks/                    # useNavScroll, useEscapeKey, useActiveSection, useToneUnderHeader
-├── lib/                      # theme engine, enquiry handler, gsap setup, motion helpers, ring sound
-├── styles/globals.css        # Design tokens (CSS variables), the three theme palettes, shared utilities
-└── types/                    # Shared TypeScript types (content, settings, enquiry)
-public/brand/prism-logo.jpg   # The EXACT logo from the company portfolio (never edit, crop or re-export)
-docs/                         # Source documents (company portfolio DOCX — the source of truth for content)
+│   ├── admin/                # Shell, forms, drawer, image picker, media library, enquiry controls
+│   ├── layout/ motion/ sections/ ui/ providers/
+├── config/                   # site.ts (defaults), owner.ts (who gets a sign-in link), adaptive.ts (Prism Adaptive tones)
+├── content/                  # Built-in starter content: seed source and offline fallback
+├── lib/
+│   ├── supabase/             # env, browser / server / anon clients, middleware helper
+│   ├── auth/admin.ts         # THE server-side owner check
+│   ├── content/              # types, defaults, mapper, cached fetcher (one query round per revalidation)
+│   └── validation/ rate-limit.ts slug.ts icons.tsx enquiry.ts theme.ts gsap.ts …
+├── middleware.ts             # first gate for /admin (defence in depth)
+├── styles/globals.css        # Tokens, the three theme palettes, shared utilities
+└── types/
+supabase/
+├── migrations/               # 01 core+owner lock · 02 content · 03 enquiries+media+anti-spam · 04 storage · 05 owner bootstrap
+├── seed.sql                  # starter content (generated from src/content)
+└── tests/rls.test.mjs        # the security suite
+public/brand/prism-logo.jpg   # the EXACT logo from the company portfolio
+docs/                         # setup + architecture + testing guides; the portfolio DOCX (git-ignored)
 ```
 
 Each folder under `components/sections/` holds a section and anything used only by it, for example `services/Services.tsx` + `ServiceDetail.tsx` + `ServiceGlyph.tsx`. Sections are re-exported from `components/sections/index.ts`.
 
 ## Editing content
 
-Copy lives in `src/content/` and is imported through `@/content`. Components never contain marketing copy of their own, so a CMS or admin API can later replace these modules with fetched data.
+**Day to day, use the admin panel** (`/admin`). It is the only thing the owner needs. The files in `src/content/` are the *starter* content: they are loaded into the database once by `supabase/seed.sql`, and shown if Supabase cannot be reached. After the seed has run, editing those files no longer changes the live site; change content in the admin, or re-generate the seed for a new database with `npm run db:seed:generate`.
 
-| File               | Controls                                                                         |
-| ------------------ | -------------------------------------------------------------------------------- |
-| `hero.ts`          | Hero headline, supporting text, CTAs                                              |
-| `about.ts`         | Overview, mission, vision, positioning pillars, core values                       |
-| `services.ts`      | The seven services: groups, one-line descriptions, summaries, capabilities        |
-| `why.ts`           | The eight reasons to choose Prism                                                 |
-| `industries.ts`    | Industries (potential fit only), the portfolio's sentence for each, policy notes  |
-| `approach.ts`      | The five-stage process                                                            |
-| `team.ts`          | The three "Meet the People Behind Prism" profile slots (name, designation, description, photo) |
-| `faq.ts`           | FAQ topics and questions                                                          |
-| `cta.ts`           | Contact headline/text and the five service commitments (footer)                   |
-| `footer.ts`        | Footer marquee phrases, navigation links, legal links, small print                |
-| `testimonials.ts`  | Approved testimonials. Empty array = section hidden                               |
-| `announcement.ts`  | Announcement popup. `enabled: false` by default                                   |
-
-**Source of truth:** the company portfolio in `docs/Prism_Solutions_Company_Portfolio.docx` (kept locally, not committed). Wording follows the portfolio, including its US spelling (organization, optimization, inquiry). Do not add services, claims, clients, statistics or certifications that it does not contain.
-
-Company, contact and social values live in **one place**: `src/config/site.ts` (the `settings` object, typed as `SiteSettings`). It is built from confirmed defaults plus `NEXT_PUBLIC_*` overrides. Components never hardcode these values.
-
-### Team photos
-
-Put images in `public/team/` (e.g. `member-1.jpg`, portrait 4:5 works best) and set `photoUrl: "/team/member-1.jpg"` in `src/content/team.ts` along with the name, designation and description. Until then each slot shows an upload-style placeholder; nothing is invented.
+**Source of truth for wording:** the company portfolio (`docs/Prism_Solutions_Company_Portfolio.docx`, kept locally, not committed). Use its wording and US spelling. Never add services, claims, clients, statistics or certifications it does not contain.
 
 ## Themes: Light, Dark and Prism Adaptive
 
@@ -219,29 +210,14 @@ Where hover/pointer interactions live, so they can be reviewed or reused:
 - Anchors that jump to sections on the home page use plain `<a href="/#id">` on purpose (the matching ESLint rule is disabled in `.eslintrc.json`).
 - Do not invent content: no fake clients, reviews, statistics, certifications, addresses, team names or contact details.
 
-## Preparing for the backend and admin panel
+## Backend and admin panel
 
-The frontend is structured so these can be added without refactoring components. Everything the admin panel will manage already has a typed home:
-
-| Admin-managed item | Where it lives today | Type |
-| ------------------ | -------------------- | ---- |
-| Team profiles: name, designation, description, photograph (3 slots) | `content/team.ts` → `team` | `TeamMember` |
-| Phone, email, office location, WhatsApp number | `config/site.ts` → `settings.contact` | `SiteSettings` |
-| Instagram URL | `config/site.ts` → `settings.social` | `SiteSettings` |
-| Company name, tagline, location label, description | `config/site.ts` → `settings.company` | `SiteSettings` |
-| Mission and vision | `content/about.ts` → `direction` | — |
-| Core values, overview, positioning pillars | `content/about.ts` | `Value`, `PositioningPillar` |
-| Services and descriptions | `content/services.ts` | `Service`, `ServiceItem` |
-| Industries and descriptions | `content/industries.ts` | `Industry` |
-| FAQs | `content/faq.ts` | `Faq` |
-| Footer content | `content/footer.ts` | `FooterContent` |
-| Announcements | `content/announcement.ts` | `Announcement` |
-| Testimonials and reviews | `content/testimonials.ts` (only `status: "published"` render) | `Testimonial` |
-| Contact inquiries (submissions) | `lib/enquiry.ts` (`submitEnquiry`) | `Enquiry` |
-
-- **Inquiries:** `src/lib/enquiry.ts` is the only code that talks to a backend. With no endpoint set it runs in preview mode and the success message says nothing was sent. Point `NEXT_PUBLIC_ENQUIRY_ENDPOINT` at an API, or replace `submitEnquiry` with a Server Action / route handler. Add server-side validation and spam protection there; client validation is for UX only.
-- **Swapping static data for an API:** each content module exports plain typed objects. Replace the export with data fetched in a server component and keep the shape.
-- **Authentication:** none is implemented. When added, protect `/admin` routes server-side (session/JWT checked in middleware and route handlers). Never rely on hidden buttons or client-side passwords. `robots.ts` already disallows `/admin` and `/api/`.
+- **Data flow (public site):** `getSiteContent()` reads every public table once (parallel queries, as the anonymous role, so only published rows are visible), maps rows to the same shapes the components always used, and caches the result for 5 minutes. Every admin save clears the cache (`revalidateTag`), so changes appear immediately. If any read fails, the built-in content is shown instead and the failure is not cached.
+- **Data flow (admin):** pages load with the owner's own session; every change goes through a Server Action that (1) re-verifies the owner, (2) validates on the server, (3) writes with the owner's session so Row Level Security is the final judge, (4) clears the public cache.
+- **One engine for every module:** a module is one entry in `src/admin/registry.ts` (fields, sections, order, publish column). The list, editor, validation, reordering and publish toggle are shared.
+- **Adding a field or module:** add the column in a new migration, add the field to `registry.ts` (and to `lib/content/map.ts` + the component if it is public). See [docs/DATABASE.md](docs/DATABASE.md).
+- **Email:** enquiries are saved and shown in Admin → Enquiries. **Nothing is e-mailed** until a mail provider is connected (isolate it behind `app/actions/public.ts`); the admin says so.
+- **Not done on purpose:** a rich-text editor (plain text with paragraphs is used, so there is nothing to sanitise), drag-and-drop ordering (Up/Down buttons are reliable and accessible), CAPTCHA, a CSP and dependency audit (reserved for the dedicated security/SEO audit, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#left-for-the-audit)).
 
 ## Building and deploying
 
@@ -250,9 +226,9 @@ npm run check    # typecheck + lint + production build
 npm start        # serve the production build locally
 ```
 
-The app is a standard Next.js app with no server-only requirements today, so it deploys to any Next-capable host. On **Vercel** or **Netlify**, import the repository, keep the default build command (`npm run build`), and set the environment variables above in the host dashboard. Set `NEXT_PUBLIC_SITE_URL` to the real domain so canonical URLs, the sitemap and Open Graph images are correct (WhatsApp/Instagram previews need absolute URLs).
+The app needs a Next-capable host with Server Actions and middleware (Vercel, Netlify with its Next runtime, or any Node host running `npm start`). Set the environment variables above in the host dashboard, then follow [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) (add the production URL to Supabase's redirect list, connect a mail sender for sign-in links).
 
-Before launch, confirm with the client: the logo file in `public/brand/prism-logo.jpg` (a vector/transparent version would be ideal), the office city/state and phone number, WhatsApp number, Instagram URL, the three team profiles (names, designations, descriptions, photographs), and final Privacy Policy and Terms (the current pages are placeholders).
+Before launch, enter in the admin: the phone number, WhatsApp number, Instagram URL, the three team profiles (real names, roles, photographs), and have the Privacy Policy and Terms written (the pages are placeholders; the privacy page now describes how forms are stored). A vector or transparent logo would improve the dark themes.
 
 ## Content integrity rules
 

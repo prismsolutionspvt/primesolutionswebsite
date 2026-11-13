@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { adaptiveProps } from "@/config/adaptive";
 import { registerGsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
-import { serviceGroups, services, servicesIntro } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { Split } from "@/components/ui/Split";
 import { ServiceDetail } from "./ServiceDetail";
 import { ServiceGlyph } from "./ServiceGlyph";
@@ -15,10 +15,11 @@ import { ServiceGlyph } from "./ServiceGlyph";
  * grouped under plain-language headings, so a visitor can see what Prism offers without opening anything.
  */
 export function Services() {
-  const [active, setActive] = useState(services[0].id);
+  const { serviceGroups, services, servicesIntro } = useContent();
+  const [active, setActive] = useState(services[0]?.id ?? "");
   const stage = useRef<HTMLDivElement>(null);
-  const current = services.find((s) => s.id === active)!;
-  const groupOf = (id: string) => serviceGroups.find((g) => g.id === id)!;
+  const current = services.find((s) => s.id === active) ?? services[0];
+  const groupOf = (id: string) => serviceGroups.find((g) => g.id === id) ?? { id, label: "" };
 
   // jump to a service from the nav menu, the hero rays or an industry's service chips
   useEffect(() => {
@@ -28,7 +29,7 @@ export function Services() {
     };
     window.addEventListener("prism:service", on);
     return () => window.removeEventListener("prism:service", on);
-  }, []);
+  }, [services]);
 
   // choreograph the stage whenever the service changes
   useEffect(() => {
@@ -114,7 +115,7 @@ export function Services() {
                               {on && (
                                 <div className="flex flex-col gap-6 pb-8 pt-2">
                                   <div className="rounded-2xl bg-surface2 p-4">
-                                    <ServiceGlyph id={s.id} className="mx-auto h-auto w-full max-w-[280px]" />
+                                    <ServiceGlyph id={s.id} icon={s.icon} className="mx-auto h-auto w-full max-w-[280px]" />
                                   </div>
                                   <ServiceDetail s={s} key={s.id} twoColumns />
                                 </div>
@@ -140,7 +141,7 @@ export function Services() {
                   </span>
                 </p>
                 <div className="my-5 rounded-2xl bg-surface2 p-4">
-                  <ServiceGlyph key={current.id} id={current.id} className="mx-auto h-auto w-full max-w-[270px]" />
+                  <ServiceGlyph key={current.id} id={current.id} icon={current.icon} className="mx-auto h-auto w-full max-w-[270px]" />
                 </div>
                 <h3 data-s-title className="h-display text-[1.9rem] xl:text-[2.25rem]" aria-label={current.name}>
                   {current.name.split(" ").map((w, i) => (

@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { adaptiveProps } from "@/config/adaptive";
 import { registerGsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
-import { industries, industriesIntro, services } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { Split } from "@/components/ui/Split";
 import { IndustryScene } from "./IndustryScene";
 
@@ -19,10 +19,11 @@ const TONES: Record<string, string> = {
 };
 
 export function Industries() {
+  const { industries, industriesIntro, services } = useContent();
   const [active, setActive] = useState(0);
   const stage = useRef<HTMLDivElement>(null);
   const ind = industries[active];
-  const tone = TONES[ind.id];
+  const tone = TONES[ind.id] ?? "#5B72B0";
 
   // depth: layers answer the pointer and the scroll; content rises in on every change
   useEffect(() => {

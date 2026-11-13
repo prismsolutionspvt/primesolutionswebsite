@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { ArrowUpRight, CheckCircle2, Loader2 } from "lucide-react";
-import { services } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { submitEnquiry, validate } from "@/lib/enquiry";
 import type { Enquiry, EnquiryErrors } from "@/types";
 
@@ -11,10 +11,17 @@ const field =
   "peer w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-base text-ink placeholder:text-muted/60 outline-none transition-all duration-300 focus:border-accent focus:shadow-[0_0_0_4px_rgb(var(--accent)/0.16),0_8px_30px_-12px_rgb(var(--accent)/0.45)] aria-[invalid=true]:border-red-500";
 
 export function ContactForm() {
+  const { services } = useContent();
   const [data, setData] = useState<Enquiry>(empty);
   const [errors, setErrors] = useState<EnquiryErrors>({});
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [mode, setMode] = useState<"delivered" | "preview">("preview");
+  const [mode, setMode] = useState<"saved" | "preview">("preview");
+  // spam / duplicate protection: a hidden honeypot, the time the form was opened, and a one-per-submission token
+  const [trap, setTrap] = useState("");
+  const meta = useRef({ token: "", start: 0 });
+  useEffect(() => {
+    meta.current = { token: crypto.randomUUID(), start: Date.now() };
+  }, []);
   const [serverError, setServerError] = useState("");
 
   useEffect(() => {
@@ -25,7 +32,7 @@ export function ContactForm() {
     };
     window.addEventListener("prism:service-interest", on);
     return () => window.removeEventListener("prism:service-interest", on);
-  }, []);
+  }, [services]);
 
   const set = (k: keyof Enquiry) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const v = e.target.value;
@@ -35,6 +42,7 @@ export function ContactForm() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (status === "loading") return; // never submit twice
     const er = validate(data);
     setErrors(er);
     if (Object.keys(er).length) {
@@ -44,11 +52,12 @@ export function ContactForm() {
     }
     setStatus("loading");
     setServerError("");
-    const res = await submitEnquiry(data);
+    const res = await submitEnquiry(data, { token: meta.current.token, elapsed: Date.now() - meta.current.start, trap });
     if (res.ok) {
       setMode(res.mode);
       setStatus("done");
       setData(empty);
+      meta.current = { token: crypto.randomUUID(), start: Date.now() };
     } else {
       setServerError(res.error);
       setStatus("error");
@@ -60,11 +69,11 @@ export function ContactForm() {
       <div role="status" className="grid min-h-[26rem] place-items-center rounded-3xl border border-line bg-surface p-8 text-center">
         <div>
           <CheckCircle2 className="mx-auto h-12 w-12 text-accent" />
-          <h3 className="h-display mt-5 text-3xl">Thank you. Your details look complete.</h3>
+          <h3 className="h-display mt-5 text-3xl">{mode === "saved" ? "Thank you. We have your enquiry." : "Thank you. Your details look complete."}</h3>
           <p className="mx-auto mt-3 max-w-sm text-muted">
-            {mode === "delivered"
-              ? "Your inquiry has been sent. The Prism team will be in touch to discuss your requirements."
-              : "This is a preview build: the form is fully working, but inquiries are not yet connected to an inbox or database, so nothing has been sent."}
+            {mode === "saved"
+              ? "Your enquiry has been saved and will be reviewed by the Prism team, who will be in touch about your requirements."
+              : "This site is not connected to its database yet, so nothing has been stored. Please contact us directly using the details on this page."}
           </p>
           <button type="button" onClick={() => setStatus("idle")} className="btn btn-ghost mt-7">
             Send another inquiry
@@ -84,7 +93,9 @@ export function ContactForm() {
   const label = "mb-2 block text-sm font-semibold";
 
   return (
-    <form onSubmit={onSubmit} noValidate className="rounded-3xl border border-line bg-surface p-5 sm:p-8" aria-label="Contact form">
+    <form onSubmit={onSubmit} noValidate className="relative rounded-3xl border border-line bg-surface p-5 sm:p-8" aria-label="Contact form">
+      {/* honeypot: invisible to people, tempting to bots */}
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden value={trap} onChange={(e) => setTrap(e.target.value)} className="pointer-events-none absolute -left-[9999px] h-0 w-0 opacity-0" />
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="f-name" className={label}>

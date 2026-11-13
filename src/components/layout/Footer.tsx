@@ -1,7 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
 import { adaptiveProps } from "@/config/adaptive";
-import { site, whatsappLink } from "@/config/site";
-import { commitment, cta, footer } from "@/content";
+import { buildWhatsappLink } from "@/config/site";
+import { getSiteContent } from "@/lib/content/fetch";
+import { SocialLinkIcon } from "@/components/ui/SocialLinkIcon";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ContactCard } from "@/components/ui/ContactCard";
 import { PoweredBy } from "@/components/ui/PoweredBy";
@@ -17,9 +18,10 @@ import { PointerGlow } from "./PointerGlow";
  * The closing scene. A looping brand line, the service commitments, large navigation that dims its siblings on hover,
  * contact details (all admin-managed settings), the logo, and a clear "Powered by FRX Technologies" credit.
  */
-export function Footer() {
+export async function Footer() {
+  const { settings, commitment, cta, footer } = await getSiteContent();
   const year = new Date().getFullYear();
-  const { email, phone, address } = site.contact;
+  const { email, phone, address } = settings.contact;
 
   return (
     <footer id="footer" {...adaptiveProps("footer")} className="relative overflow-hidden border-t border-line bg-bg">
@@ -40,7 +42,7 @@ export function Footer() {
             </p>
           </div>
           <div data-fade>
-            <CommitmentGrid />
+            <CommitmentGrid items={commitment.items} />
           </div>
 
           {/* navigation + contact */}
@@ -64,26 +66,37 @@ export function Footer() {
 
             <div className="lg:col-span-5">
               <p className="eyebrow mb-5">Get in touch</p>
+              {settings.footerExtra.showContact && (
               <div className="grid gap-3">
                 <ContactCard icon={Mail} label="Email" value={email} href={`mailto:${email}`} copy />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <ContactCard icon={Phone} label="Phone" value={phone} href={phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : undefined} copy emptyText="Phone number coming soon" />
-                  <ContactCard icon={MapPin} label="Location" value={address || site.locationLabel} />
+                  <ContactCard icon={MapPin} label="Location" value={address || settings.company.locationLabel} />
                 </div>
               </div>
+              )}
               <div className="mt-5 flex gap-3">
+                {settings.whatsapp.enabled && (
                 <Magnetic strength={0.45}>
-                  <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Prism Solutions" className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-[0_0_24px_-4px_rgb(37_211_102/0.7)]">
+                  <a href={buildWhatsappLink(settings.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Prism Solutions" className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-[0_0_24px_-4px_rgb(37_211_102/0.7)]">
                     <WhatsappIcon className="h-5 w-5" />
                   </a>
                 </Magnetic>
-                {site.social.instagram && (
+                )}
+                {settings.social.instagramUrl && (
                   <Magnetic strength={0.45}>
-                    <a href={site.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Prism Solutions on Instagram" className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-accent hover:bg-accent hover:text-[#0B1F4B] hover:shadow-[0_0_24px_-4px_rgb(var(--glow)/0.8)]">
+                    <a href={settings.social.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Prism Solutions on Instagram" className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-accent hover:bg-accent hover:text-[#0B1F4B] hover:shadow-[0_0_24px_-4px_rgb(var(--glow)/0.8)]">
                       <InstagramIcon className="h-5 w-5" />
                     </a>
                   </Magnetic>
                 )}
+                {settings.social.links.map((l) => (
+                  <Magnetic key={l.id} strength={0.45}>
+                    <a href={l.url} target="_blank" rel="noopener noreferrer" aria-label={l.label} className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-accent hover:bg-accent hover:text-[#0B1F4B]">
+                      <SocialLinkIcon platform={l.platform} />
+                    </a>
+                  </Magnetic>
+                ))}
               </div>
               <div className="mt-8">
                 <Magnetic>
@@ -100,16 +113,16 @@ export function Footer() {
           <div className="mt-20 flex flex-col items-center gap-9 border-t border-line pb-24 pt-14 text-center sm:pb-16 lg:mt-28">
             <div className="relative">
               <div aria-hidden className="absolute inset-0 -z-10 scale-125 rounded-full bg-accent/25 blur-3xl" />
-              <BrandLogo height={84} />
+              <BrandLogo height={84} src={settings.brand.logoPrimaryUrl || undefined} />
             </div>
 
-            <PoweredBy />
+            <PoweredBy label={settings.credit.label} href={settings.credit.href} />
 
             <div className="flex flex-col items-center gap-3 text-sm text-muted">
               <p className="max-w-xl text-[0.78rem] leading-relaxed">{footer.note}</p>
               <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
                 <p>
-                  © {year} {site.name}. All rights reserved.
+                  © {year} {settings.company.name}. All rights reserved.
                 </p>
                 {footer.legal.map((l) => (
                   <a key={l.label} href={l.href} className="link-u inline-flex min-h-[40px] items-center">

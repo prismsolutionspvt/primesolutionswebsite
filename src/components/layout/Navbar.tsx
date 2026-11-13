@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { navLinks } from "@/config/site";
-import { services, serviceGroups } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
+import { AdminEntry } from "@/components/admin/AdminEntry";
 import { useActiveSection, useEscapeKey, useNavScroll, useToneUnderHeader } from "@/hooks";
 
 /** Every homepage section id, mapped to the nav item it belongs under (so the highlight is right wherever you are). */
@@ -26,6 +27,7 @@ const NAV_OF: Record<string, string> = {
 const SECTION_IDS = Object.keys(NAV_OF);
 
 export function Navbar() {
+  const { services, serviceGroups, settings } = useContent();
   const [open, setOpen] = useState(false);
   const { scrolled, hidden } = useNavScroll(open);
   const active = NAV_OF[useActiveSection(SECTION_IDS)] ?? "";
@@ -88,7 +90,7 @@ export function Navbar() {
             }`}
           >
             <a href="/#top" aria-label="Prism Solutions — home" data-nav-logo className="logo-shine relative shrink-0 overflow-hidden rounded-xl">
-              <BrandLogo height={50} priority />
+              <BrandLogo height={50} priority src={settings.brand.logoPrimaryUrl || undefined} />
             </a>
 
             <ul ref={listRef} onMouseLeave={() => moveTo(null)} className="relative hidden items-center lg:flex">
@@ -157,7 +159,8 @@ export function Navbar() {
             </ul>
 
             <div className="flex items-center gap-2">
-              <ThemeSwitcher />
+              <AdminEntry className="hidden xl:inline-flex" />
+              {settings.theme.switcherEnabled && <ThemeSwitcher />}
               <a href="/#contact" className="btn btn-primary hidden !min-h-[44px] px-5 sm:inline-flex">
                 Get in Touch
               </a>
@@ -183,9 +186,10 @@ export function Navbar() {
             className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-bg"
           >
             <div className="wrap flex h-[76px] shrink-0 items-center justify-between pt-3">
-              <BrandLogo height={42} />
+              <BrandLogo height={42} src={settings.brand.logoPrimaryUrl || undefined} />
               <div className="flex items-center gap-2">
-                <ThemeSwitcher />
+                <AdminEntry />
+                {settings.theme.switcherEnabled && <ThemeSwitcher />}
                 <button type="button" onClick={close} aria-label="Close menu" className="grid h-11 w-11 place-items-center rounded-full border border-line text-ink">
                   <X className="h-5 w-5" />
                 </button>
@@ -224,8 +228,12 @@ export function Navbar() {
               ))}
             </ul>
             <div className="wrap pb-3">
-              <p className="mb-2 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-muted">Theme</p>
-              <ThemeSwitcher labeled />
+              {settings.theme.switcherEnabled && (
+                <>
+                  <p className="mb-2 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-muted">Theme</p>
+                  <ThemeSwitcher labeled />
+                </>
+              )}
             </div>
             <div className="wrap pb-8">
               <a href="/#contact" onClick={close} className="btn btn-primary w-full">

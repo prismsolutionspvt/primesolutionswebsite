@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX, X } from "lucide-react";
-import { whatsappLink } from "@/config/site";
+import { buildWhatsappLink } from "@/config/site";
+import { useContent } from "@/components/providers/ContentProvider";
 import { WhatsappIcon } from "@/components/ui/SocialIcons";
 import { playRing } from "@/lib/ringSound";
 import { RobotScene } from "./RobotScene";
@@ -15,6 +16,8 @@ const SOUND_KEY = "prism-sound";
  * - Sound is OFF by default, never autoplays, and only plays after an explicit click/tap while enabled.
  */
 export function WhatsAppWidget() {
+  const { settings } = useContent();
+  const waHref = buildWhatsappLink(settings.whatsapp);
   const [open, setOpen] = useState(false);
   const [ringing, setRinging] = useState(false);
   const [sound, setSound] = useState(false);
@@ -78,6 +81,7 @@ export function WhatsAppWidget() {
     }
   };
 
+  if (!settings.whatsapp.enabled) return null;
   return (
     <div
       ref={root}
@@ -113,7 +117,7 @@ export function WhatsAppWidget() {
             <p className="font-display text-[1.35rem] font-semibold leading-tight tracking-tight">Need assistance? Let&apos;s talk.</p>
             <p className="mt-1.5 text-sm leading-relaxed text-muted">Message the Prism team on WhatsApp and tell us what you need.</p>
             <a
-              href={whatsappLink()}
+              href={waHref}
               target="_blank"
               rel="noopener noreferrer"
               tabIndex={open ? 0 : -1}
@@ -137,7 +141,7 @@ export function WhatsAppWidget() {
 
       {/* the floating button */}
       <a
-        href={whatsappLink()}
+        href={waHref}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with Prism Solutions on WhatsApp"

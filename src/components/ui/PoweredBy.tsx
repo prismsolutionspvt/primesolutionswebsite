@@ -1,12 +1,13 @@
 import { ArrowUpRight } from "lucide-react";
-import { poweredBy } from "@/config/site";
+import { poweredBy as defaults } from "@/config/site";
 
 /**
  * "Powered by FRX Technologies" — an intentional brand credit, not legal small print.
  * The whole pill is the link (opens in a new tab). Colours come from theme tokens, so it stays legible in
  * Light, Dark and Prism Adaptive, and on the always-white preloader. Used in the preloader and the footer.
  */
-export function PoweredBy({ className = "" }: { className?: string }) {
+export function PoweredBy({ className = "", label = defaults.label, href = defaults.href }: { className?: string; label?: string; href?: string }) {
+  const poweredBy = { label, href };
   return (
     <a
       href={poweredBy.href}

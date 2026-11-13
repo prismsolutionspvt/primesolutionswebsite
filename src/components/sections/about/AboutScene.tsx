@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { registerGsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
-import { positioning } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 
 /* A scroll-driven scene built from the logo's own geometry: one swoosh and a four-point star.
    As you scroll, the star travels the swoosh, leaves a luminous trail and lights each of Prism's four
@@ -12,6 +12,7 @@ const STOPS = [0.2, 0.44, 0.68, 0.9];
 const STAR = "M0 -20 Q2.4 -2.4 20 0 Q2.4 2.4 0 20 Q-2.4 2.4 -20 0 Q-2.4 -2.4 0 -20Z";
 
 export function AboutScene() {
+  const { positioning } = useContent();
   const root = useRef<HTMLDivElement>(null);
   const arcRef = useRef<SVGPathElement>(null);
   const [active, setActive] = useState(-1);

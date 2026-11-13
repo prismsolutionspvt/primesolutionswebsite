@@ -2,13 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import { adaptiveProps } from "@/config/adaptive";
 import { registerGsap } from "@/lib/gsap";
-import { why } from "@/content";
+import { useContent } from "@/components/providers/ContentProvider";
 import { Split } from "@/components/ui/Split";
 import { WhyRing } from "./WhyRing";
 
-const N = why.items.length;
-
 export function Why() {
+  const { why } = useContent();
+  const N = why.items.length;
   const [active, setActive] = useState(0);
   const pin = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -55,7 +55,7 @@ export function Why() {
       };
     });
     return () => mm.revert();
-  }, []);
+  }, [N]);
 
   // swap the active reason's text with a masked rise
   useEffect(() => {

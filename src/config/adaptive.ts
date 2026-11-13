@@ -13,6 +13,7 @@
  *  why         dark   the rotating ring and its beam are a spotlit stage
  *  industries  light  editorial index and multi-tone scenes keep their true colours on white
  *  approach    dark   five cinematic scenes in a pinned sequence
+ *  reviews     light  the interactive review composer and approved reviews sit on a bright, friendly page
  *  faq         light  reading and scanning
  *  contact     dark   glow details and the form pop on navy
  *  footer      dark   shares the contact scene so the page ends on one closing composition
@@ -31,7 +32,7 @@ export const adaptiveTone = {
   why: "dark",
   industries: "light",
   approach: "dark",
-  testimonials: "light",
+  reviews: "light",
   faq: "light",
   contact: "dark",
   footer: "dark",
@@ -50,7 +51,7 @@ const ORDER: SectionKey[] = [
   "why",
   "industries",
   "approach",
-  "testimonials",
+  "reviews",
   "faq",
   "contact",
   "footer",
@@ -59,9 +60,9 @@ const ORDER: SectionKey[] = [
 /**
  * Attributes for a section root. `data-adaptive` carries the tone; `data-sheet` marks sections where the tone
  * changes so they slide over the previous one with rounded corners (Prism Adaptive only).
- * `hidden` lists sections that are not rendered (e.g. testimonials until real ones exist).
+ * `hidden` lists sections that are not rendered .
  */
-export function adaptiveProps(key: SectionKey, hidden: SectionKey[] = ["testimonials"]) {
+export function adaptiveProps(key: SectionKey, hidden: SectionKey[] = []) {
   const order = ORDER.filter((k) => !hidden.includes(k) || k === key);
   const prev = order[order.indexOf(key) - 1];
   const tone: Tone = adaptiveTone[key];

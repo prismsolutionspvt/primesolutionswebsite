@@ -8,5 +8,3 @@ export * from "./team";
 export * from "./faq";
 export * from "./cta";
 export * from "./footer";
-export * from "./testimonials";
-export * from "./announcement";
