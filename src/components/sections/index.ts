@@ -1,10 +1,12 @@
 export { Hero } from "./hero/Hero";
 export { About } from "./about/About";
+export { Direction } from "./direction/Direction";
+export { Values } from "./values/Values";
+export { Team } from "./team/Team";
 export { Services } from "./services/Services";
 export { Why } from "./why/Why";
 export { Industries } from "./industries/Industries";
 export { Approach } from "./approach/Approach";
-export { Founder } from "./founder/Founder";
 export { Testimonials } from "./testimonials/Testimonials";
 export { Faq } from "./faq/Faq";
 export { Contact } from "./contact/Contact";

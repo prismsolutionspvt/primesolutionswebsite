@@ -6,7 +6,7 @@ const R = 188;
 
 /** Eight reasons on a ring around the prism. The ring turns so the active reason always faces the text on the right,
  *  and a beam from the prism connects to it. Nodes are buttons, so it also works with keyboard / without scroll. */
-export function WhyRing({ count, active, onSelect, labels }: { count: number; active: number; onSelect: (i: number) => void; labels: string[] }) {
+export function WhyRing({ count, active, onSelect, labels, className = "h-auto w-full max-w-[520px]" }: { count: number; active: number; onSelect: (i: number) => void; labels: string[]; className?: string }) {
   const step = 360 / count;
 
   // turn by the shortest way round so the ring never spins backwards through a full circle
@@ -25,7 +25,7 @@ export function WhyRing({ count, active, onSelect, labels }: { count: number; ac
   };
 
   return (
-    <svg viewBox="0 0 520 520" className="h-auto w-full max-w-[520px]" role="group" aria-label="Eight reasons to choose Prism Solutions">
+    <svg viewBox="0 0 520 520" className={className} role="group" aria-label="Eight reasons to choose Prism Solutions">
       <circle cx={C} cy={C} r={R} fill="none" stroke="rgb(var(--ink))" strokeOpacity=".14" strokeWidth="1.5" />
       <circle cx={C} cy={C} r={R - 52} fill="none" stroke="rgb(var(--ink))" strokeOpacity=".1" strokeDasharray="2 8" />
       <circle cx={C} cy={C} r={R + 36} fill="none" stroke="rgb(var(--accent))" strokeOpacity=".18" strokeWidth="1.5" />
@@ -52,8 +52,9 @@ export function WhyRing({ count, active, onSelect, labels }: { count: number; ac
               aria-pressed={on}
               onClick={() => onSelect(i)}
               onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onSelect(i))}
-              className="cursor-pointer outline-none [&:focus-visible>circle:first-child]:stroke-[rgb(var(--accent))]"
+              className="why-node cursor-pointer outline-none"
             >
+              <title>{label}</title>
               <circle cx={p.x} cy={p.y} r={on ? 30 : 21} fill={on ? "rgb(var(--accent))" : "rgb(var(--bg))"} stroke={on ? "rgb(var(--accent))" : "rgb(var(--ink))"} strokeOpacity={on ? 1 : 0.5} strokeWidth="2.5" style={{ transition: "all .5s cubic-bezier(.22,1,.36,1)" }} />
               <text className="why-num" x={p.x} y={p.y + 5.5} textAnchor="middle" fontSize={on ? 18 : 14} fontWeight="700" fontFamily="var(--font-mono)" fill={on ? "rgb(11 31 75)" : "rgb(var(--ink))"} style={{ transition: "font-size .4s" }}>
                 {String(i + 1).padStart(2, "0")}

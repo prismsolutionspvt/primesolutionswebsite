@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { registerGsap, whenReady } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
+import { adaptiveProps } from "@/config/adaptive";
 import { hero, services } from "@/content";
 import { Split } from "@/components/ui/Split";
 import { Magnetic } from "@/components/motion/Magnetic";
@@ -101,7 +102,7 @@ export function Hero() {
   const pick = (id: string) => window.dispatchEvent(new CustomEvent("prism:service", { detail: id }));
 
   return (
-    <section ref={root} id="top" className="relative isolate flex min-h-[100svh] flex-col overflow-hidden pt-24 sm:pt-28 lg:pt-20">
+    <section ref={root} id="top" {...adaptiveProps("hero")} className="relative isolate flex min-h-[100svh] flex-col overflow-hidden pt-24 sm:pt-28 lg:pt-20">
       {/* soft light where the beam leaves the prism */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(46%_52%_at_72%_50%,rgb(var(--glow)/0.13),transparent_72%)]" />
       {/* registration grid — structural, fades out downward */}
@@ -109,8 +110,8 @@ export function Hero() {
       {/* swoosh motif echoing the logo's arc */}
       <svg data-orbits aria-hidden viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
         <path data-orbit pathLength={1} d="M-40 640 C 300 220, 760 60, 1260 150" fill="none" stroke="rgb(var(--accent))" strokeOpacity=".5" strokeWidth="2" strokeLinecap="round" />
-        <path data-orbit pathLength={1} d="M-40 700 C 340 300, 800 140, 1260 250" fill="none" stroke="rgb(var(--ink))" strokeOpacity=".12" strokeWidth="1.5" strokeLinecap="round" />
-        <path data-orbit pathLength={1} d="M-40 760 C 380 380, 840 220, 1260 350" fill="none" stroke="rgb(var(--ink))" strokeOpacity=".08" strokeWidth="1.5" strokeLinecap="round" />
+        <path data-orbit pathLength={1} d="M-40 700 C 340 300, 800 140, 1260 250" fill="none" style={{ stroke: "rgb(var(--chalk) / var(--chalk-o1))" }} strokeWidth="1.5" strokeLinecap="round" />
+        <path data-orbit pathLength={1} d="M-40 760 C 380 380, 840 220, 1260 350" fill="none" style={{ stroke: "rgb(var(--chalk) / var(--chalk-o2))" }} strokeWidth="1.5" strokeLinecap="round" />
       </svg>
 
       <div className="wrap grid flex-1 items-center gap-8 pb-8 lg:grid-cols-12 lg:gap-4">

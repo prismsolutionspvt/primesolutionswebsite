@@ -1,10 +1,11 @@
 import { Preloader } from "@/components/motion/Preloader";
 import { MotionRoot } from "@/components/motion/MotionRoot";
+import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppWidget } from "@/components/layout/WhatsAppWidget";
 import { AnnouncementModal } from "@/components/layout/AnnouncementModal";
-import { About, Approach, Contact, Faq, Founder, Hero, Industries, Services, Testimonials, Why } from "@/components/sections";
+import { About, Approach, Contact, Direction, Faq, Hero, Industries, Services, Team, Testimonials, Values, Why } from "@/components/sections";
 import { site } from "@/config/site";
 
 export default function Home() {
@@ -23,11 +24,14 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Preloader />
       <MotionRoot />
+      <ScrollProgress />
       <Navbar />
       <main>
         <Hero />
         <About />
-        <Founder />
+        <Direction />
+        <Values />
+        <Team />
         <Services />
         <Why />
         <Industries />

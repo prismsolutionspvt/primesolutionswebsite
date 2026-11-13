@@ -14,7 +14,7 @@ Use clear, imperative commit messages (`Add testimonials admin types`, `Fix mobi
 ## Before you open a PR
 
 - [ ] `npm run typecheck`, `npm run lint` and `npm run build` pass.
-- [ ] Checked at ~390px, ~768px and ≥1280px, light and dark theme; no horizontal overflow.
+- [ ] Checked at ~390px, ~768px and ≥1280px in **all three themes** (Light, Dark, Prism Adaptive); no horizontal overflow; pinned sections fit the viewport.
 - [ ] Keyboard-only navigation still works; focus is visible.
 - [ ] Animations respect `prefers-reduced-motion` and clean up (`gsap.context(...).revert()`, killed ScrollTriggers).
 - [ ] No `console.log`/debug code, no unused files or dependencies.
@@ -22,11 +22,13 @@ Use clear, imperative commit messages (`Add testimonials admin types`, `Fix mobi
 
 ## Content rules (non-negotiable)
 
+The company portfolio (`docs/`, kept locally) is the source of truth. Use its wording and its US spelling (organization, optimization, inquiry). Check new copy against it before committing.
+
 Do not add invented clients, testimonials, statistics, certifications, office locations or contact details. Unconfirmed information stays configurable (environment variables or `src/content`) and renders as a clear placeholder.
 
 ## Adding things
 
-- **A new homepage section:** create `src/components/sections/<name>/<Name>.tsx`, export it from `sections/index.ts`, add its copy to `src/content/<name>.ts` and types to `src/types`, then place it in `src/app/page.tsx`. Give the root `<section>` an `id` if it needs a nav anchor.
+- **A new homepage section:** create `src/components/sections/<name>/<Name>.tsx`, export it from `sections/index.ts`, add its copy to `src/content/<name>.ts` and types to `src/types`, then place it in `src/app/page.tsx`. Give the root `<section>` an `id` if it needs a nav anchor, and spread `{...adaptiveProps("<key>")}` on it after adding the key and its tone (with a one-line reason) to `src/config/adaptive.ts`, so it takes part in Prism Adaptive.
 - **A new service or industry:** edit `src/content/services.ts` or `industries.ts`. Services also need a drawing in `sections/services/ServiceGlyph.tsx` (keyed by service `id`).
 - **A new environment variable:** add it to `src/config/site.ts`, `.env.example` and the README table.
 - **A new animation:** prefer the shared data attributes handled by `MotionRoot`. For bespoke choreography use `registerGsap()` inside `gsap.context` and clean up on unmount.

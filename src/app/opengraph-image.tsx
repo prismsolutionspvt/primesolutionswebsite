@@ -6,7 +6,7 @@ export const alt = "Prism Solutions — Your Partner in Business Growth.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** 1200×630 social preview (WhatsApp, Instagram, LinkedIn, X): the exact Prism logo, uncropped, on white. */
+/** 1200×630 social preview (WhatsApp, Instagram, X and other link previews): the exact Prism logo, uncropped, on white. */
 export default async function OgImage() {
   const file = await readFile(path.join(process.cwd(), "public", "brand", "prism-logo.jpg"));
   const src = `data:image/jpeg;base64,${file.toString("base64")}`;

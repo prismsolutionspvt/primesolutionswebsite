@@ -69,8 +69,8 @@ export function AboutScene() {
         <svg viewBox="0 0 1200 520" className="block h-auto w-full" role="img" aria-label="A star travels along a swoosh and lights four pillars: business process support, customer experience, sales enablement and digital growth.">
           {/* back layer: faint arcs */}
           <g data-back fill="none" strokeLinecap="round">
-            <path d="M-40 520 C 240 220, 700 90, 1240 160" stroke="rgb(var(--ink))" strokeOpacity=".07" strokeWidth="2" />
-            <path d="M-40 560 C 260 280, 720 150, 1240 230" stroke="rgb(var(--ink))" strokeOpacity=".07" strokeWidth="2" />
+            <path d="M-40 520 C 240 220, 700 90, 1240 160" style={{ stroke: "rgb(var(--chalk) / var(--chalk-o2))" }} strokeWidth="2" />
+            <path d="M-40 560 C 260 280, 720 150, 1240 230" style={{ stroke: "rgb(var(--chalk) / var(--chalk-o2))" }} strokeWidth="2" />
             <path d="M-40 480 C 220 160, 680 40, 1240 100" stroke="rgb(var(--accent))" strokeOpacity=".18" strokeWidth="2" />
           </g>
           {/* prism outlines drifting behind */}

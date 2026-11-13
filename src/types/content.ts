@@ -1,8 +1,8 @@
-/** A bullet inside a service. `detail` is optional supporting copy shown on expand. */
+/** A capability inside a service. `detail` is the portfolio's own supporting sentence, shown on expand. */
 export type ServiceItem = { title: string; detail?: string };
 
-/** Groups mirror the portfolio: digital growth, customer & revenue operations, business operations. */
-export type ServiceGroupId = "digital" | "customer" | "operations";
+/** Groups mirror the portfolio: customer & revenue operations, business operations, digital growth. */
+export type ServiceGroupId = "customer" | "operations" | "digital";
 
 export type ServiceGroup = { id: ServiceGroupId; label: string };
 
@@ -13,7 +13,11 @@ export type Service = {
   /** Short label for compact UI (hero rays, menus) */
   ray: string;
   group: ServiceGroupId;
+  /** One concise line shown in the service list so every service is understood at a glance */
+  tagline: string;
   summary: string;
+  /** Extra portfolio sentence shown under the summary (optional) */
+  note?: string;
   items: ServiceItem[];
 };
 
@@ -22,12 +26,12 @@ export type IndustrySceneKind = "healthcare" | "realestate" | "ecommerce" | "saa
 export type Industry = {
   id: string;
   name: string;
-  /** One-line framing of the fit — never implies past engagements */
+  /** The portfolio's own sentence for this industry (potential service fit — never past engagements) */
   summary: string;
-  /** Services that map to this industry (from the portfolio) */
-  services: string[];
-  /** Compliance / policy wording where the portfolio requires it */
+  /** Policy / compliance clause the portfolio requires for this industry */
   note?: string;
+  /** Prism services (by service id) that map to this industry */
+  fits: string[];
   scene: IndustrySceneKind;
 };
 
@@ -45,12 +49,26 @@ export type Value = { word: string; line: string };
 
 export type PositioningPillar = { title: string; text: string };
 
-export type Founder = {
+/** One of the three "Meet the people behind Prism" profile slots. All fields are admin-editable; empty fields render as placeholders. */
+export type TeamMember = {
+  id: string;
   name: string;
   designation: string;
-  message: string;
-  /** Public path or absolute URL of the portrait. */
+  /** Individual description / biography written by the client — never invented */
+  description: string;
+  /** Public path (e.g. "/team/member-1.jpg") or absolute URL of the portrait */
   photoUrl: string;
+};
+
+export type FooterLink = { label: string; href: string; hint?: string };
+
+export type FooterContent = {
+  /** Phrases that loop in the closing marquee */
+  marquee: string[];
+  explore: FooterLink[];
+  legal: FooterLink[];
+  /** Small print taken from the portfolio */
+  note: string;
 };
 
 export type Testimonial = {

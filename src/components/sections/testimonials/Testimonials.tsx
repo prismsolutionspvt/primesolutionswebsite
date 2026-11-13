@@ -1,3 +1,4 @@
+import { adaptiveProps } from "@/config/adaptive";
 import { testimonials } from "@/content";
 import { Split } from "@/components/ui/Split";
 
@@ -12,7 +13,7 @@ export function Testimonials() {
   if (featured.length === 0) return null; // nothing is shown until genuine, approved testimonials exist
 
   return (
-    <section id="testimonials" className="relative bg-surface2/50 py-24 sm:py-32">
+    <section id="testimonials" {...adaptiveProps("testimonials", [])} className="relative bg-surface2/50 py-24 sm:py-32">
       <div className="wrap">
         <div className="grid items-end gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">

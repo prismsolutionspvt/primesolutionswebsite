@@ -85,7 +85,7 @@ export function WhatsAppWidget() {
       onMouseEnter={() => !touchMode.current && openPanel(false)}
       onMouseLeave={() => {
         if (touchMode.current) return;
-        timer.current = window.setTimeout(closePanel, 250);
+        timer.current = window.setTimeout(closePanel, 220);
       }}
       onBlur={(e) => {
         if (!root.current?.contains(e.relatedTarget as Node)) closePanel();
@@ -151,9 +151,11 @@ export function WhatsAppWidget() {
             openPanel(true);
           }
         }}
-        className="whatsapp-fab group relative grid h-[60px] w-[60px] place-items-center rounded-full bg-[#25D366] text-white shadow-[0_12px_30px_-8px_rgb(0_0_0/0.45)] transition-transform duration-300 hover:scale-105 active:scale-95"
+        className="whatsapp-fab group relative flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#25D366] text-white hover:scale-105 active:scale-95"
       >
-        <WhatsappIcon className="h-8 w-8" />
+        <span className="wa-icon flex h-8 w-8 items-center justify-center">
+          <WhatsappIcon className="block h-8 w-8" />
+        </span>
       </a>
     </div>
   );

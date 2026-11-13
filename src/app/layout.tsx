@@ -40,11 +40,11 @@ export const viewport: Viewport = {
 };
 
 /**
- * Runs before first paint: light theme by default (a saved preference wins), a "js" flag,
- * and the first-visit preloader flag — so there is no flash of the wrong theme or content.
+ * Runs before first paint: Light by default for first-time visitors (a saved Light/Dark/Adaptive choice wins),
+ * a "js" flag, and the first-visit preloader flag — so there is no flash of the wrong theme or content.
  */
 const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');
-var t='light';try{var s=localStorage.getItem('prism-theme');if(s==='dark'||s==='light')t=s}catch(e){}
+var t='light';try{var s=localStorage.getItem('prism-theme');if(s==='dark'||s==='light'||s==='adaptive')t=s}catch(e){}
 d.dataset.theme=t;
 try{if(!sessionStorage.getItem('prism-seen')){d.classList.add('is-preloading')}}catch(e){}})();`;
 
@@ -53,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="light" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+        <link rel="preload" as="image" href="/brand/prism-logo.jpg" />
         <noscript>
           <style>{`.preloader{display:none!important}html.is-preloading,html.is-preloading body{overflow:auto!important}`}</style>
         </noscript>

@@ -91,6 +91,26 @@ export function MotionRoot() {
       cleanups.push(() => {});
     }
 
+    // cursor spotlight inside buttons (fine pointers only; one delegated listener, rAF-throttled)
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      let raf = 0;
+      const onMove = (e: PointerEvent) => {
+        const btn = (e.target as Element | null)?.closest?.<HTMLElement>(".btn");
+        if (!btn) return;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const r = btn.getBoundingClientRect();
+          btn.style.setProperty("--bx", `${e.clientX - r.left}px`);
+          btn.style.setProperty("--by", `${e.clientY - r.top}px`);
+        });
+      };
+      document.addEventListener("pointermove", onMove, { passive: true });
+      cleanups.push(() => {
+        cancelAnimationFrame(raf);
+        document.removeEventListener("pointermove", onMove);
+      });
+    }
+
     const refresh = () => ScrollTrigger.refresh();
     window.addEventListener("load", refresh);
     document.fonts?.ready.then(refresh);

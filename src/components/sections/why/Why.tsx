@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { adaptiveProps } from "@/config/adaptive";
 import { registerGsap } from "@/lib/gsap";
 import { why } from "@/content";
 import { Split } from "@/components/ui/Split";
@@ -22,7 +23,7 @@ export function Why() {
       const st = ScrollTrigger.create({
         trigger: pin.current,
         start: "top top",
-        end: () => `+=${Math.round(window.innerHeight * 2.4)}`,
+        end: () => `+=${Math.round(window.innerHeight * 1.5)}`, // eight points over 1.5 screens: ~170px of scroll each
         pin: true,
         anticipatePin: 1,
         onUpdate: (self) => {
@@ -71,31 +72,34 @@ export function Why() {
   const cur = why.items[active];
 
   return (
-    <section id="why" className="relative">
-      {/* desktop: pinned scene */}
-      <div ref={pin} className="hidden min-h-screen items-center py-24 lg:flex">
-        <div className="wrap w-full">
-          <p className="eyebrow mb-5">{why.eyebrow}</p>
-          <h2 className="h-display max-w-[20ch] text-[clamp(2.4rem,4.4vw,4.6rem)]">
-            Why businesses choose <span className="text-accent">Prism&nbsp;Solutions.</span>
-          </h2>
-          <div className="mt-8 grid items-center gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-6 xl:col-span-5">
-              <WhyRing count={N} active={active} onSelect={setActive} labels={why.items.map((r) => r.title)} />
+    <section id="why" {...adaptiveProps("why")} className="relative">
+      {/* desktop: pinned scene. Everything is sized from the viewport height (svh) so the whole composition
+          — heading, ring, number and text — always fits on screen, from 600px-tall laptops to large monitors. */}
+      <div ref={pin} className="hidden h-[100svh] lg:block">
+        <div className="wrap flex h-full flex-col pb-[clamp(0.75rem,3svh,2rem)] pt-[clamp(4.75rem,11svh,7rem)]">
+          <div className="shrink-0">
+            <p className="eyebrow mb-[clamp(0.4rem,1.6svh,1.1rem)]">{why.eyebrow}</p>
+            <h2 className="h-display max-w-[24ch] text-[clamp(1.9rem,min(4.2vw,7svh),4.4rem)]">
+              Why businesses choose <span className="text-accent">Prism&nbsp;Solutions.</span>
+            </h2>
+          </div>
+          <div className="mt-[clamp(0.5rem,2.5svh,2rem)] grid min-h-0 flex-1 grid-cols-12 items-center gap-8">
+            <div className="col-span-6 flex h-full min-h-0 items-center justify-center xl:col-span-5">
+              <WhyRing count={N} active={active} onSelect={setActive} labels={why.items.map((r) => r.title)} className="h-full max-h-full w-auto max-w-full" />
             </div>
-            <div ref={textRef} className="lg:col-span-6 xl:col-span-6 xl:col-start-7" aria-live="polite">
-              <p className="font-display text-[6rem] font-semibold leading-none tracking-tightest text-accent/90 tabular-nums">{String(active + 1).padStart(2, "0")}</p>
-              <h3 className="h-display mt-2 text-[clamp(1.9rem,3.2vw,3.2rem)]" aria-label={cur.title}>
+            <div ref={textRef} className="col-span-6 xl:col-start-7" aria-live="polite">
+              <p className="font-display text-[clamp(3.25rem,min(9vw,14svh),6.25rem)] font-semibold leading-none tracking-tightest text-accent/90 tabular-nums">{String(active + 1).padStart(2, "0")}</p>
+              <h3 className="h-display mt-1 text-[clamp(1.7rem,min(3.1vw,6svh),3.2rem)]" aria-label={cur.title}>
                 {cur.title.split(" ").map((w, i) => (
                   <span key={i} data-t className="mr-[0.25em] inline-block overflow-hidden pb-[0.1em] align-top" aria-hidden>
                     <span className="inline-block">{w}</span>
                   </span>
                 ))}
               </h3>
-              <p data-d className="mt-5 max-w-md text-lg leading-relaxed text-muted">
+              <p data-d className="mt-[clamp(0.6rem,2svh,1.25rem)] max-w-md text-[clamp(1rem,2.4svh,1.2rem)] leading-relaxed text-muted">
                 {cur.text}
               </p>
-              <div className="mt-8 flex items-center gap-1.5" aria-hidden>
+              <div className="mt-[clamp(0.9rem,3svh,2rem)] flex items-center gap-1.5" aria-hidden>
                 {why.items.map((_, i) => (
                   <span key={i} className={`h-[3px] rounded-full transition-all duration-500 ${i === active ? "w-10 bg-accent" : "w-4 bg-line"}`} />
                 ))}

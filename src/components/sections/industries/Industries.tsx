@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import { adaptiveProps } from "@/config/adaptive";
 import { registerGsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
-import { industries, industriesIntro } from "@/content";
+import { industries, industriesIntro, services } from "@/content";
 import { Split } from "@/components/ui/Split";
 import { IndustryScene } from "./IndustryScene";
 
@@ -54,7 +56,7 @@ export function Industries() {
   const hoverable = () => window.matchMedia("(hover: hover) and (min-width: 1024px)").matches;
 
   return (
-    <section id="industries" className="relative py-20 sm:py-28 lg:py-36">
+    <section id="industries" {...adaptiveProps("industries")} className="relative py-20 sm:py-28 lg:py-36">
       <div className="wrap">
         <div className="grid items-end gap-6 lg:grid-cols-12">
           <div className="lg:col-span-7">
@@ -115,14 +117,25 @@ export function Industries() {
                   {ind.summary}
                 </p>
                 <p data-ind-in className="mb-3 mt-6 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-accent-text">
-                  Where Prism services can help
+                  Prism services that fit
                 </p>
                 <ul className="flex flex-wrap gap-2">
-                  {ind.services.map((s) => (
-                    <li key={s} data-ind-in className="rounded-full border border-line px-3.5 py-1.5 text-[0.88rem] font-medium">
-                      {s}
-                    </li>
-                  ))}
+                  {ind.fits.map((id) => {
+                    const svc = services.find((x) => x.id === id);
+                    if (!svc) return null;
+                    return (
+                      <li key={id} data-ind-in>
+                        <a
+                          href="#services"
+                          onClick={() => window.dispatchEvent(new CustomEvent("prism:service", { detail: id }))}
+                          className="chip-link group inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-line px-3.5 text-[0.88rem] font-medium transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-accent hover:text-[#0B1F4B]"
+                        >
+                          {svc.name}
+                          <ArrowUpRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" aria-hidden />
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
                 {ind.note && (
                   <p data-ind-in className="mt-5 border-l-2 pl-4 text-[0.88rem] leading-relaxed text-muted" style={{ borderColor: tone }}>

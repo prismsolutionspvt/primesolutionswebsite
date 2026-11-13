@@ -1,150 +1,124 @@
-import { ArrowUpRight, Mail } from "lucide-react";
-import { navLinks, poweredBy, site, whatsappLink } from "@/config/site";
-import { commitment, services } from "@/content";
+import { ArrowUpRight } from "lucide-react";
+import { adaptiveProps } from "@/config/adaptive";
+import { site, whatsappLink } from "@/config/site";
+import { commitment, cta, footer } from "@/content";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { ContactCard } from "@/components/ui/ContactCard";
+import { PoweredBy } from "@/components/ui/PoweredBy";
 import { InstagramIcon, WhatsappIcon } from "@/components/ui/SocialIcons";
 import { Split } from "@/components/ui/Split";
-import { CommitmentList } from "./CommitmentList";
+import { Magnetic } from "@/components/motion/Magnetic";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { CommitmentGrid } from "./CommitmentGrid";
+import { FooterMarquee } from "./FooterMarquee";
 import { PointerGlow } from "./PointerGlow";
 
-/** The closing scene: commitments, one big way to get in touch, and the quiet details. */
+/**
+ * The closing scene. A looping brand line, the service commitments, large navigation that dims its siblings on hover,
+ * contact details (all admin-managed settings), the logo, and a clear "Powered by FRX Technologies" credit.
+ */
 export function Footer() {
   const year = new Date().getFullYear();
   const { email, phone, address } = site.contact;
 
   return (
-    <footer className="relative overflow-hidden border-t border-line bg-surface">
+    <footer id="footer" {...adaptiveProps("footer")} className="relative overflow-hidden border-t border-line bg-bg">
       <PointerGlow>
-        {/* swoosh motif, drawn once on entry by MotionRoot ([data-draw-on-view]) */}
-        <svg aria-hidden viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 h-full w-full">
-          <path data-draw-on-view pathLength={1} d="M-40 480 C 300 120, 800 20, 1260 110" fill="none" stroke="rgb(var(--accent))" strokeOpacity=".35" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <FooterMarquee phrases={footer.marquee} />
 
-        <div className="wrap relative pt-20 sm:pt-28">
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <p className="eyebrow mb-6" data-fade>
-                Our commitment
-              </p>
-              <Split as="h2" className="h-display text-[clamp(2.3rem,7vw,5rem)] lg:text-[clamp(2.6rem,4.4vw,4.8rem)]" accent={["Progress."]}>
-                {commitment.heading}
-              </Split>
-              <p className="mt-6 max-w-md text-[1.02rem] leading-relaxed text-muted" data-fade>
-                {commitment.text}
-              </p>
-            </div>
-            <div className="lg:col-span-7" data-fade>
-              <CommitmentList />
-            </div>
-          </div>
-
-          {/* the big way to get in touch */}
-          <div className="mt-20 border-t border-line pt-14 sm:mt-28 sm:pt-20">
-            <p className="eyebrow mb-5 flex items-center gap-3" data-fade>
-              <span className="relative inline-block h-2.5 w-2.5 rounded-full bg-accent live-dot" />
-              Say hello
+        <div className="wrap relative pt-16 sm:pt-24">
+          {/* closing statement + commitments (portfolio section 10) */}
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="eyebrow mb-6" data-fade>
+              {commitment.eyebrow}
             </p>
-            <a
-              href={`mailto:${email}`}
-              className="group relative block w-fit max-w-full break-words font-display text-[clamp(1.55rem,6.2vw,4.6rem)] font-semibold leading-[1.05] tracking-tightest"
-            >
-              <span className="bg-[linear-gradient(rgb(var(--accent)),rgb(var(--accent)))] bg-[length:0%_3px] bg-[position:0_100%] bg-no-repeat pb-1 transition-[background-size] duration-700 ease-out group-hover:bg-[length:100%_3px]">{email}</span>
-              <ArrowUpRight className="ml-2 inline h-[0.7em] w-[0.7em] -translate-x-1 translate-y-1 text-accent opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" aria-hidden />
-            </a>
-            <p className="mt-5 max-w-lg text-[1.02rem] text-muted">Tell us about your business goals and we will take it from there.</p>
+            <Split as="h2" className="h-display text-[clamp(2.3rem,7vw,5.2rem)] lg:text-[clamp(2.8rem,5vw,5.2rem)]" accent={["Progress."]}>
+              {commitment.heading}
+            </Split>
+            <p className="mx-auto mt-6 max-w-2xl text-[1.02rem] leading-relaxed text-muted" data-fade>
+              {commitment.text}
+            </p>
+          </div>
+          <div data-fade>
+            <CommitmentGrid />
           </div>
 
-          {/* details */}
-          <div className="mt-20 grid gap-12 border-t border-line pt-12 lg:grid-cols-12">
-            <div className="lg:col-span-4">
-              <BrandLogo height={72} />
-              <p className="mt-5 max-w-xs text-[0.95rem] leading-relaxed text-muted">{site.description}</p>
-              <div className="mt-6 flex gap-3">
-                {site.social.instagram && (
-                  <a href={site.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Prism Solutions on Instagram" className="grid h-11 w-11 place-items-center rounded-full border border-line transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:text-accent">
-                    <InstagramIcon className="h-5 w-5" />
-                  </a>
-                )}
-                <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Prism Solutions" className="grid h-11 w-11 place-items-center rounded-full border border-line transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:text-accent">
-                  <WhatsappIcon className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-
-            <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-8">
-              <div>
-                <p className="eyebrow mb-4">Explore</p>
-                <ul className="space-y-1">
-                  {navLinks.map((l) => (
-                    <li key={l.id}>
-                      <a href={l.href} className="link-u inline-flex min-h-[40px] items-center text-[0.98rem] text-ink/85">
-                        {l.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="col-span-2 sm:col-span-1">
-                <p className="eyebrow mb-4">Services</p>
-                <ul className="space-y-1">
-                  {services.map((s) => (
-                    <li key={s.id}>
-                      <a href="/#services" className="link-u inline-flex min-h-[40px] items-center text-[0.98rem] text-ink/85">
-                        {s.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="col-span-2 sm:col-span-1">
-                <p className="eyebrow mb-4">Contact</p>
-                <ul className="space-y-3 text-[0.98rem] text-ink/85">
-                  <li className="flex items-start gap-2">
-                    <Mail className="mt-1 h-4 w-4 shrink-0 text-accent-text" aria-hidden />
-                    <a className="link-u break-all" href={`mailto:${email}`}>
-                      {email}
+          {/* navigation + contact */}
+          <div className="mt-20 grid gap-14 lg:mt-28 lg:grid-cols-12 lg:gap-16">
+            <nav aria-label="Footer" className="lg:col-span-7">
+              <p className="eyebrow mb-5">Explore</p>
+              <ul className="footer-list border-b border-line">
+                {footer.explore.map((l, i) => (
+                  <li key={l.label}>
+                    <a href={l.href} className="footer-link group relative flex items-baseline gap-5 border-t border-line py-3.5 sm:py-4">
+                      <span aria-hidden className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-700 ease-out group-hover:scale-x-100" />
+                      <span className="w-7 font-mono text-xs text-muted transition-colors duration-300 group-hover:text-accent-text">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="font-display text-[clamp(1.7rem,3.6vw,3rem)] font-semibold leading-none tracking-tight transition-transform duration-500 ease-out group-hover:translate-x-3">{l.label}</span>
+                      {l.hint && <span className="ml-auto hidden max-w-[15rem] text-right text-sm text-muted opacity-0 transition-all duration-500 sm:block sm:translate-x-2 group-hover:translate-x-0 group-hover:opacity-100">{l.hint}</span>}
+                      <ArrowUpRight className="h-6 w-6 shrink-0 -translate-x-2 self-center text-accent opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:opacity-100 sm:ml-0" aria-hidden />
                     </a>
                   </li>
-                  {phone && (
-                    <li>
-                      <a className="link-u" href={`tel:${phone.replace(/[^\d+]/g, "")}`}>
-                        {phone}
-                      </a>
-                    </li>
-                  )}
-                  <li className="text-muted">{address || site.locationLabel}</li>
-                </ul>
-              </div>
+                ))}
+              </ul>
             </nav>
-          </div>
 
-          <div className="mt-14 flex flex-col gap-5 border-t border-line py-7 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:pr-20">
-            <p>
-              © {year} {site.name}. All rights reserved.
-            </p>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-              <a href="/privacy" className="link-u inline-flex min-h-[40px] items-center">
-                Privacy Policy
-              </a>
-              <a href="/terms" className="link-u inline-flex min-h-[40px] items-center">
-                Terms
-              </a>
-              <a
-                href={poweredBy.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Powered by ${poweredBy.label} (opens in a new tab)`}
-                className="group relative inline-flex min-h-[44px] items-center gap-2.5 overflow-hidden rounded-full border border-line px-5 text-[0.95rem] transition-colors duration-300 hover:border-accent"
-              >
-                <span aria-hidden className="absolute inset-0 origin-left scale-x-0 bg-accent/15 transition-transform duration-500 ease-out group-hover:scale-x-100" />
-                <span className="relative">Powered by</span>
-                <span className="relative font-display font-semibold tracking-tight text-ink">{poweredBy.label}</span>
-                <ArrowUpRight className="relative h-4 w-4 text-accent-text transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
-              </a>
+            <div className="lg:col-span-5">
+              <p className="eyebrow mb-5">Get in touch</p>
+              <div className="grid gap-3">
+                <ContactCard icon={Mail} label="Email" value={email} href={`mailto:${email}`} copy />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ContactCard icon={Phone} label="Phone" value={phone} href={phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : undefined} copy emptyText="Phone number coming soon" />
+                  <ContactCard icon={MapPin} label="Location" value={address || site.locationLabel} />
+                </div>
+              </div>
+              <div className="mt-5 flex gap-3">
+                <Magnetic strength={0.45}>
+                  <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Prism Solutions" className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-[0_0_24px_-4px_rgb(37_211_102/0.7)]">
+                    <WhatsappIcon className="h-5 w-5" />
+                  </a>
+                </Magnetic>
+                {site.social.instagram && (
+                  <Magnetic strength={0.45}>
+                    <a href={site.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Prism Solutions on Instagram" className="grid h-12 w-12 place-items-center rounded-full border border-line transition-all duration-300 hover:border-accent hover:bg-accent hover:text-[#0B1F4B] hover:shadow-[0_0_24px_-4px_rgb(var(--glow)/0.8)]">
+                      <InstagramIcon className="h-5 w-5" />
+                    </a>
+                  </Magnetic>
+                )}
+              </div>
+              <div className="mt-8">
+                <Magnetic>
+                  <a href="/#contact" className="btn btn-primary group !min-h-[54px] px-7">
+                    {cta.button}
+                    <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
+                  </a>
+                </Magnetic>
+              </div>
             </div>
           </div>
-          {/* keeps the last row clear of the floating WhatsApp button */}
-          <div className="h-16 sm:h-4" />
+
+          {/* the finish: logo, credit, legal */}
+          <div className="mt-20 flex flex-col items-center gap-9 border-t border-line pb-24 pt-14 text-center sm:pb-16 lg:mt-28">
+            <div className="relative">
+              <div aria-hidden className="absolute inset-0 -z-10 scale-125 rounded-full bg-accent/25 blur-3xl" />
+              <BrandLogo height={84} />
+            </div>
+
+            <PoweredBy />
+
+            <div className="flex flex-col items-center gap-3 text-sm text-muted">
+              <p className="max-w-xl text-[0.78rem] leading-relaxed">{footer.note}</p>
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
+                <p>
+                  © {year} {site.name}. All rights reserved.
+                </p>
+                {footer.legal.map((l) => (
+                  <a key={l.label} href={l.href} className="link-u inline-flex min-h-[40px] items-center">
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </PointerGlow>
     </footer>

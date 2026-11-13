@@ -5,8 +5,13 @@
 /* ───────── Design tokens (brand from the supplied logo) ─────────
    navy   #0B1F4B  — wordmark      orange #F28A1E — arc
    amber  #F7A83B  — star
-   LIGHT is the default theme. Every colour on the site comes from these variables,
-   so both themes are designed, not inverted. */
+
+   THREE THEMES, selected with <html data-theme="light|dark|adaptive">:
+   • light     — every section light (default for first-time visitors)
+   • dark      — every section dark
+   • adaptive  — "Prism Adaptive": a curated mix. The :root palette is light; sections marked
+                 data-adaptive="dark" (see src/config/adaptive.ts) switch to the dark palette.
+   Everything on the site reads these variables, so every theme is designed, not inverted. */
 :root {
   --bg: 255 255 255;
   --surface: 247 249 252;
@@ -17,9 +22,18 @@
   --accent: 242 138 30;
   --accent-text: 176 88 0; /* AA-safe orange for small text on light */
   --glow: 242 138 30;
+  /* the thin curved/"chalk" lines in hero and scenes */
+  --chalk: 11 31 75;
+  --chalk-o1: 0.12;
+  --chalk-o2: 0.08;
   color-scheme: light;
 }
-:root[data-theme="dark"] {
+
+/* Dark palette — shared by the Dark theme, by dark-toned sections in Prism Adaptive,
+   and by the navigation bar while it sits over a dark section (data-tone). */
+:root[data-theme="dark"],
+:root[data-theme="adaptive"] [data-adaptive="dark"],
+:root[data-theme="adaptive"] [data-tone="dark"] {
   --bg: 7 15 38;
   --surface: 13 25 56;
   --surface2: 20 35 76;
@@ -29,8 +43,37 @@
   --accent: 245 154 51;
   --accent-text: 247 168 59;
   --glow: 247 168 59;
+  /* chalk-style lines turn dark blue (same width and shape, different colour) */
+  --chalk: 46 84 168;
+  --chalk-o1: 0.62;
+  --chalk-o2: 0.42;
   color-scheme: dark;
 }
+
+/* Prism Adaptive: each curated section paints its own background and text colour.
+   :where() keeps this low-specificity so a section's own bg-* utility still wins. */
+@layer base {
+  :where(:root[data-theme="adaptive"]) [data-adaptive] {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--ink));
+  }
+}
+
+/* Adaptive "sheet" edge: where the tone changes, the incoming section slides over the previous one with rounded corners */
+:root[data-theme="adaptive"] [data-adaptive][data-sheet] {
+  margin-top: -2rem;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  position: relative;
+}
+@media (min-width: 1024px) {
+  :root[data-theme="adaptive"] [data-adaptive][data-sheet] {
+    margin-top: -3rem;
+    border-top-left-radius: 3rem;
+    border-top-right-radius: 3rem;
+  }
+}
+
 /* Forces the light palette (used by the white preloader regardless of theme) */
 .surface-day {
   --bg: 255 255 255;
@@ -41,6 +84,7 @@
   --line: 219 225 237;
   --accent: 242 138 30;
   --accent-text: 176 88 0;
+  --glow: 242 138 30;
   background: #fff;
   color: rgb(11 31 75);
 }
@@ -50,10 +94,19 @@ html {
   scroll-behavior: auto;
   scroll-padding-top: 5rem;
 }
-html.theme-fade *,
-html.theme-fade *::before,
-html.theme-fade *::after {
-  transition: background-color 0.45s ease, color 0.45s ease, border-color 0.45s ease, fill 0.45s ease, stroke 0.45s ease !important;
+
+/* Theme switch: a circular reveal driven by the View Transitions API (see lib/theme.ts).
+   No per-element transitions are used, so switching never lags; browsers without the API switch instantly. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
 }
 body {
   background: rgb(var(--bg));
@@ -167,9 +220,6 @@ html.is-preloading body {
   .ray-flow {
     animation: none;
   }
-  html.theme-fade * {
-    transition: none !important;
-  }
 }
 
 .preloader { display: none; }
@@ -199,7 +249,9 @@ html.is-preloading .preloader { display: flex; }
 @media (prefers-reduced-motion: reduce) { .panel-in { animation: none; } }
 
 /* The logo artwork has a white background: give it a white plate in dark mode */
-:root[data-theme="dark"] .logo-plate {
+:root[data-theme="dark"] .logo-plate,
+:root[data-theme="adaptive"] [data-adaptive="dark"] .logo-plate,
+:root[data-theme="adaptive"] [data-tone="dark"] .logo-plate {
   background: #fff;
   border-radius: 0.85rem;
   padding: 0.3rem 0.55rem;
@@ -228,10 +280,25 @@ html.is-preloading .preloader { display: flex; }
 @keyframes robot-sway { 50% { transform: translateX(2px) rotate(1.5deg); } }
 @keyframes robot-waves { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes robot-shake { 0%, 100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-1.2px) rotate(-1.5deg); } 75% { transform: translateX(1.2px) rotate(1.5deg); } }
-.whatsapp-fab::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid #25d366; opacity: 0; animation: fab-ping 2.6s ease-out 4; pointer-events: none; }
-@keyframes fab-ping { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(1.7); opacity: 0; } }
+.whatsapp-fab {
+  filter: drop-shadow(0 0 10px rgb(37 211 102 / 0.45));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, filter 0.35s ease;
+  box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.45), 0 0 0 0 rgb(37 211 102 / 0.55);
+  animation: wa-glow 3.2s ease-out 3;
+}
+.whatsapp-fab:hover,
+.whatsapp-fab:focus-visible {
+  filter: drop-shadow(0 0 18px rgb(37 211 102 / 0.75));
+  box-shadow: 0 12px 36px -8px rgb(0 0 0 / 0.5), 0 0 0 7px rgb(37 211 102 / 0.18);
+}
+.whatsapp-fab:hover .wa-icon { transform: rotate(-10deg) scale(1.08); }
+.wa-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes wa-glow {
+  0% { box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.45), 0 0 0 0 rgb(37 211 102 / 0.55); }
+  70%, 100% { box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.45), 0 0 0 20px rgb(37 211 102 / 0); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .robot *, .whatsapp-fab::after { animation: none !important; }
+  .robot *, .whatsapp-fab { animation: none !important; }
 }
 
 /* ───────── Buttons: sheen sweep, soft glow ───────── */
@@ -250,3 +317,99 @@ html.is-preloading .preloader { display: flex; }
 .why-ring { transform: rotate(var(--r, 0deg)); transform-origin: 260px 260px; transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1); }
 .why-ring .why-num { transform: rotate(calc(var(--r, 0deg) * -1)); transform-box: fill-box; transform-origin: center; transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1); }
 @media (prefers-reduced-motion: reduce) { .why-ring, .why-ring .why-num { transition: none; } }
+
+
+/* The nav logo is revealed by the preloader's logo flight (see motion/Preloader.tsx) */
+html.is-preloading [data-nav-logo] { opacity: 0; }
+
+/* ───────── "Powered by FRX Technologies" — an intentional brand credit ───────── */
+.powered-by {
+  border: 1px solid rgb(var(--accent) / 0.5);
+  background: linear-gradient(135deg, rgb(var(--bg) / 0.92), rgb(var(--surface2) / 0.92));
+  box-shadow: 0 0 0 4px rgb(var(--glow) / 0.06), 0 10px 34px -12px rgb(var(--glow) / 0.55);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.powered-by:hover,
+.powered-by:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgb(var(--accent));
+  box-shadow: 0 0 0 6px rgb(var(--glow) / 0.12), 0 14px 44px -10px rgb(var(--glow) / 0.8);
+}
+.powered-by-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgb(var(--glow) / 0.28) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.powered-by:hover .powered-by-sheen { transform: translateX(120%); }
+
+/* Nav logo: a warm sheen passes over the artwork on hover (blend keeps the white background untouched) */
+.logo-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(247 168 59 / 0.75) 50%, transparent 65%);
+  mix-blend-mode: overlay;
+  transform: translateX(-130%);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.logo-shine:hover::after { transform: translateX(130%); }
+
+
+/* ───────── Scroll-lit words (mission & vision) ───────── */
+.js .sw { opacity: 0.16; }
+@media (prefers-reduced-motion: reduce) { .js .sw { opacity: 1; } }
+
+/* ───────── Team portraits: tilt toward the cursor, swoosh draws on hover ───────── */
+.team-tilt {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.35s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.team-arc { stroke-dasharray: 1; stroke-dashoffset: 1; stroke-linecap: butt; opacity: 0; transition: stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease; }
+.group:hover .team-arc, .group:focus-within .team-arc { stroke-dashoffset: 0; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .team-tilt { transform: none; transition: none; } }
+
+/* ───────── Closing marquee ───────── */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee-track { display: flex; width: max-content; animation: marquee 52s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-text {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(2.6rem, 7.4vw, 6.4rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  white-space: nowrap;
+  transition: color 0.35s ease;
+}
+.marquee-item:hover .marquee-text { color: rgb(var(--accent)); }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+/* ───────── Footer navigation: hovering one link quietly dims the rest ───────── */
+.footer-link { transition: opacity 0.4s ease; }
+.footer-list:hover .footer-link:not(:hover):not(:focus-visible) { opacity: 0.38; }
+@media (hover: none) { .footer-list:hover .footer-link:not(:hover) { opacity: 1; } }
+
+/* ───────── Buttons: a soft spotlight follows the cursor (position set in MotionRoot) ───────── */
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(130px circle at var(--bx, 50%) var(--by, 50%), rgb(255 255 255 / 0.38), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn:hover::after { opacity: 1; }
+.btn-ghost::after { background: radial-gradient(130px circle at var(--bx, 50%) var(--by, 50%), rgb(var(--glow) / 0.22), transparent 70%); }
+
+/* Why-Prism ring nodes: swell and light up on hover / keyboard focus */
+.why-node circle { transform-box: fill-box; transform-origin: center; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s; }
+.why-node:hover circle,
+.why-node:focus-visible circle { transform: scale(1.16); stroke: rgb(var(--accent)); stroke-opacity: 1; }

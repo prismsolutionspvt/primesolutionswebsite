@@ -63,11 +63,11 @@ export function ContactForm() {
           <h3 className="h-display mt-5 text-3xl">Thank you. Your details look complete.</h3>
           <p className="mx-auto mt-3 max-w-sm text-muted">
             {mode === "delivered"
-              ? "Your enquiry has been sent. The Prism team will be in touch to discuss your requirements."
-              : "This is a preview build: the form is fully working, but enquiries are not yet connected to an inbox or database, so nothing has been sent."}
+              ? "Your inquiry has been sent. The Prism team will be in touch to discuss your requirements."
+              : "This is a preview build: the form is fully working, but inquiries are not yet connected to an inbox or database, so nothing has been sent."}
           </p>
           <button type="button" onClick={() => setStatus("idle")} className="btn btn-ghost mt-7">
-            Send another enquiry
+            Send another inquiry
           </button>
         </div>
       </div>
@@ -150,7 +150,7 @@ export function ContactForm() {
             </>
           ) : (
             <>
-              Send Enquiry <ArrowUpRight className="h-[18px] w-[18px] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              Send Inquiry <ArrowUpRight className="h-[18px] w-[18px] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </>
           )}
         </button>

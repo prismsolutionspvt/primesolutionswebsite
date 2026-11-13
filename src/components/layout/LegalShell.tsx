@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
 export function LegalShell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -9,7 +9,7 @@ export function LegalShell({ title, children }: { title: string; children: React
         <a href="/" aria-label="Prism Solutions home">
           <BrandLogo height={48} priority />
         </a>
-        <ThemeToggle />
+        <ThemeSwitcher />
       </div>
       <article className="wrap max-w-3xl py-16 sm:py-24">
         <a href="/" className="link-u mb-10 inline-flex min-h-[44px] items-center gap-2 text-sm text-muted">

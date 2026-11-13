@@ -5,15 +5,31 @@ import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { navLinks } from "@/config/site";
 import { services, serviceGroups } from "@/content";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { useActiveSection, useEscapeKey, useNavScroll } from "@/hooks";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
+import { useActiveSection, useEscapeKey, useNavScroll, useToneUnderHeader } from "@/hooks";
 
-const SECTION_IDS = navLinks.map((l) => l.id);
+/** Every homepage section id, mapped to the nav item it belongs under (so the highlight is right wherever you are). */
+const NAV_OF: Record<string, string> = {
+  top: "top",
+  about: "about",
+  direction: "about",
+  values: "about",
+  team: "about",
+  services: "services",
+  why: "services",
+  industries: "industries",
+  approach: "approach",
+  testimonials: "approach",
+  faq: "",
+  contact: "contact",
+};
+const SECTION_IDS = Object.keys(NAV_OF);
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { scrolled, hidden } = useNavScroll(open);
-  const active = useActiveSection(SECTION_IDS);
+  const active = NAV_OF[useActiveSection(SECTION_IDS)] ?? "";
+  const tone = useToneUnderHeader(); // Prism Adaptive: the bar takes the tone of the section beneath it
   const [dd, setDd] = useState(false);
   const [mSvc, setMSvc] = useState(false);
   const ddRef = useRef<HTMLLIElement>(null);
@@ -64,14 +80,15 @@ export function Navbar() {
         <div className="wrap pt-3 sm:pt-4">
           <nav
             aria-label="Primary"
+            data-tone={tone}
             className={`flex h-[60px] items-center justify-between gap-3 rounded-full pl-3 pr-2 transition-all duration-500 sm:h-[64px] sm:pl-4 ${
               scrolled
                 ? "border border-line bg-bg/80 shadow-[0_10px_40px_-18px_rgb(var(--ink)/0.35)] backdrop-blur-xl"
                 : "border border-transparent bg-transparent"
             }`}
           >
-            <a href="/#top" aria-label="Prism Solutions — home" className="shrink-0 rounded-xl transition-opacity hover:opacity-90">
-              <BrandLogo height={48} priority />
+            <a href="/#top" aria-label="Prism Solutions — home" data-nav-logo className="logo-shine relative shrink-0 overflow-hidden rounded-xl">
+              <BrandLogo height={50} priority />
             </a>
 
             <ul ref={listRef} onMouseLeave={() => moveTo(null)} className="relative hidden items-center lg:flex">
@@ -82,7 +99,7 @@ export function Navbar() {
               />
               {navLinks.map((l) => {
                 const isActive = active === l.id;
-                const base = "relative z-10 flex min-h-[44px] items-center gap-1 rounded-full px-4 text-[0.92rem] font-medium transition-colors";
+                const base = "group/link relative z-10 flex min-h-[44px] items-center gap-1 rounded-full px-4 text-[0.92rem] font-medium transition-colors";
                 return "dropdown" in l ? (
                   <li key={l.id} className="relative" ref={ddRef} onMouseEnter={(e) => { moveTo(e.currentTarget); setDd(true); }} onMouseLeave={() => setDd(false)}>
                     <button
@@ -132,7 +149,7 @@ export function Navbar() {
                   <li key={l.id} onMouseEnter={(e) => moveTo(e.currentTarget)}>
                     <a href={l.href} onFocus={(e) => moveTo(e.currentTarget.parentElement)} aria-current={isActive ? "true" : undefined} className={`${base} ${isActive ? "text-ink" : "text-ink/70 hover:text-ink"}`}>
                       {l.label}
-                      {isActive && <span className="absolute inset-x-4 bottom-1.5 h-px bg-accent" />}
+                      <span className={`absolute inset-x-4 bottom-1.5 h-px origin-center bg-accent transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover/link:scale-x-100"}`} />
                     </a>
                   </li>
                 );
@@ -140,7 +157,7 @@ export function Navbar() {
             </ul>
 
             <div className="flex items-center gap-2">
-              <ThemeToggle />
+              <ThemeSwitcher />
               <a href="/#contact" className="btn btn-primary hidden !min-h-[44px] px-5 sm:inline-flex">
                 Get in Touch
               </a>
@@ -168,7 +185,7 @@ export function Navbar() {
             <div className="wrap flex h-[76px] shrink-0 items-center justify-between pt-3">
               <BrandLogo height={42} />
               <div className="flex items-center gap-2">
-                <ThemeToggle />
+                <ThemeSwitcher />
                 <button type="button" onClick={close} aria-label="Close menu" className="grid h-11 w-11 place-items-center rounded-full border border-line text-ink">
                   <X className="h-5 w-5" />
                 </button>
@@ -206,6 +223,10 @@ export function Navbar() {
                 </motion.li>
               ))}
             </ul>
+            <div className="wrap pb-3">
+              <p className="mb-2 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-muted">Theme</p>
+              <ThemeSwitcher labeled />
+            </div>
             <div className="wrap pb-8">
               <a href="/#contact" onClick={close} className="btn btn-primary w-full">
                 Get in Touch
