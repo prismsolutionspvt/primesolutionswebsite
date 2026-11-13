@@ -155,6 +155,19 @@ test("enquiry form: valid passes; bad email/phone/message and bot signals are re
   assert.equal(enquirySchema.safeParse({ ...good, trap: "x" }).success, false);
 });
 
+// ───────────────────────── owner password rules
+const { passwordProblem } = load(path.join(root, "src/lib/password.ts"));
+test("password rules: length, variety, common words and the email name are refused; a passphrase passes", () => {
+  assert.ok(passwordProblem("short1!"));
+  assert.ok(passwordProblem("aaaaaaaaaaaaaaaa"));
+  assert.ok(passwordProblem("MyPassword12345"));
+  assert.ok(passwordProblem("prismsolutions-2026-x"));
+  assert.match(passwordProblem("zebra-owner99-quiet-harbor", "owner99@gmail.com"), /email/i);
+  assert.ok(passwordProblem("x".repeat(129)));
+  assert.equal(passwordProblem("river-lantern-orbit-seven", "prismsolutions.pvt@gmail.com"), null);
+  assert.equal(passwordProblem("Tr0ub4dor&3-horse-staple", "a@b.co"), null);
+});
+
 // ───────────────────────── database → website mapper
 const raw = (over = {}) => ({
   settings: { content_seeded: true, whatsapp_enabled: true, whatsapp_country_code: "92", whatsapp_number: "0300 1234567".replace(/\D/g, ""), whatsapp_message: "Hi", instagram_enabled: true, instagram_url: "https://instagram.com/prism", contact_email: "a@b.co", default_theme: "dark", theme_switcher_enabled: false, frx_label: "FRX", frx_url: "https://frx.example", footer_marquee: [], footer_note: "", logo_primary_path: "logos/x.png", ...over.settings },

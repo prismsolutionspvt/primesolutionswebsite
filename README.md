@@ -37,7 +37,7 @@ This repository now contains the **website, the Supabase backend and the owner's
 - Accessibility: semantic landmarks, keyboard-operable menus, tabs and accordions, visible focus, `prefers-reduced-motion` support.
 - **Leave a review:** an interactive section (star-burst rating, a face that changes mood, a live preview, a confetti finish). Reviews arrive as *pending* and appear only after the owner approves them.
 - **Announcements:** an animated pop-up (a bottom sheet on phones) with scheduling, priority and "how often" rules, managed from the admin.
-- **Admin panel** at `/admin`: owner-only, with 17 modules (content, services with subcategories, industries, team, reviews, FAQs, announcements, enquiries inbox, media library, contact & social, appearance, settings).
+- **Admin panel** at `/admin`: owner-only (email + password, with an emailed one-time link as backup), with 17 modules (content, services with subcategories, industries, team, reviews, FAQs, announcements, enquiries inbox, media library, contact & social, appearance, settings).
 
 ## Tech stack
 

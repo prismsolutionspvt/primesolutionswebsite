@@ -1,6 +1,6 @@
 # Admin guide (for the owner)
 
-Open `/admin` on your website and sign in with your email (a one-time link is emailed to you; there is no password). Everything you change goes live on the website straight away.
+Open `/admin` on your website and sign in with your email and password. (Forgotten the password? Choose "Email me a sign-in link" and open the link in the same browser.) You can change the password in **Admin Settings**. Everything you change goes live on the website straight away.
 
 ## The sidebar
 

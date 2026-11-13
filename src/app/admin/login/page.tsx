@@ -32,7 +32,7 @@ export default async function AdminLogin({ searchParams }: { searchParams: Promi
           </p>
           <h1 className="h-display mt-3 text-3xl sm:text-4xl">Sign in to manage the website</h1>
           <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">
-            This area is private. Enter the owner’s email address and we’ll send a one-time sign-in link. There is no password.
+            This area is private. Sign in with the owner’s email address and password. If you have forgotten the password, you can have a one-time sign-in link emailed instead.
           </p>
           {error && (
             <p role="alert" className="mt-5 rounded-xl border border-[#F28A1E]/40 bg-[#F28A1E]/10 p-3 text-sm leading-relaxed">

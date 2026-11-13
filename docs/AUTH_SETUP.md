@@ -1,11 +1,17 @@
 # Authentication: the one-owner lock
 
-Only **prismsolutions.pvt@gmail.com** can manage the website. There are no other roles, no registration and no passwords in the code.
+Only **prismsolutions.pvt@gmail.com** can manage the website. There are no other roles and no registration. Passwords are never stored by this app: they live only in Supabase Auth.
 
 ## How a sign-in works
 
-1. The owner opens `/admin` (it is not linked anywhere public) and enters their email.
-2. The server action (`src/admin/actions/auth.ts`) sends a **one-time sign-in link** with Supabase Auth, **only** if the address equals the owner's (`src/config/owner.ts`), and never creates a user. The page shows the *same* message whether or not the address is the owner's, so it cannot be used to find out who is authorised. It is rate-limited per visitor and per address.
+There are two ways in. Both end at the same database check (lock 5 below).
+
+**Email + password (the normal way).** The owner opens `/admin` and enters their email and password. `signInWithPassword` in `src/admin/actions/auth.ts` calls Supabase Auth, then asks the database whether the session is the owner; if not, the session is signed out at once. Every failure shows the *same* message ("Incorrect email or password.") and calls Supabase the same way, so the form cannot reveal which address is the owner's. Attempts are rate-limited (8 per visitor and 6 per address per 10 minutes, on top of Supabase's own limits). The password is set or changed in **Admin → Admin Settings → Password** (minimum 12 characters; common words and the email name are refused), or in the Supabase dashboard (Authentication → Users → the owner → reset password).
+
+**One-time email link (the backup, for a forgotten password).**
+
+1. The owner opens `/admin` and chooses "Email me a sign-in link".
+2. The server action sends a **one-time sign-in link** with Supabase Auth, **only** if the address equals the owner's (`src/config/owner.ts`), and never creates a user. The page shows the *same* message whether or not the address is the owner's, so it cannot be used to find out who is authorised. It is rate-limited per visitor and per address.
 3. The owner opens the link **in the same browser**. `/auth/callback` exchanges it for a session (PKCE).
 4. The callback then asks the **database** whether this session is the owner. If not, it signs the session straight out. Only a verified owner is sent to `/admin`.
 
@@ -43,8 +49,8 @@ Every policy goes through the single function `public.is_owner()`, so Administra
 
 ## Threat notes
 
-- **Passwords.** The owner user may have a password because the dashboard asks for one. If it leaks, someone could sign in with it through the API, because the database checks *who* the user is, not *how* they signed in. Use a long random password you never keep, or use **Add user → Send invitation** instead. Do not reuse a password.
+- **Passwords.** The database checks *who* the user is, not *how* they signed in, so a leaked or guessed password is enough to get in. Use a long passphrase that you use nowhere else, change it if you suspect it has leaked, and keep the email-link option as the way to recover. Supabase rate-limits password attempts and this app adds its own limit, but neither replaces a strong password. Multi-factor authentication (an extra code) is the next step and is reserved for the audit.
 - **Same-browser links.** Links created with PKCE only work in the browser that requested them. This is a security feature.
 - **Mail delivery** is a Supabase matter; see [SUPABASE_SETUP.md](SUPABASE_SETUP.md#4-make-sure-the-sign-in-email-can-actually-be-delivered).
 - **Session expiry** is handled by Supabase (refresh tokens) and by the middleware refreshing on each admin request; an expired session sends the owner back to sign-in, and a Server Action returns "Your session has expired".
-- **Not yet done** (reserved for the dedicated security audit): MFA, CAPTCHA on the sign-in form, a Content-Security-Policy, shared-store rate limiting, audit-log retention.
+- **Not yet done** (reserved for the dedicated security audit): MFA (an extra sign-in code), CAPTCHA on the sign-in form, a Content-Security-Policy, shared-store rate limiting, audit-log retention.

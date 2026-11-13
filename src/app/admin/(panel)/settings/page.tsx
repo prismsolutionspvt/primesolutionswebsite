@@ -4,6 +4,7 @@ import { getAdmin } from "@/lib/auth/admin";
 import { getSiteContent } from "@/lib/content/fetch";
 import { signOutAction } from "@/admin/actions/auth";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { ChangePasswordForm } from "@/components/admin/ChangePasswordForm";
 
 export const metadata = { title: "Admin Settings" };
 
@@ -27,7 +28,7 @@ export default async function SettingsPage() {
           <dl className="space-y-3 text-sm">
             <div><dt className="text-muted">Signed in as</dt><dd className="font-semibold">{admin?.email}</dd></div>
             <div><dt className="text-muted">Role</dt><dd className="font-semibold">Owner</dd></div>
-            <div><dt className="text-muted">Sign-in method</dt><dd className="font-semibold">One-time email link (no password)</dd></div>
+            <div><dt className="text-muted">Sign-in methods</dt><dd className="font-semibold">Email + password, or a one-time email link</dd></div>
           </dl>
           <p className="mt-4 text-sm leading-relaxed text-muted">
             Only this one address can manage the website. The lock is enforced by the database itself, not only by this page, so no other account can read or change anything here, even if it signs in. To hand the site to someone else, the project owner changes the address in Supabase (see docs/AUTH_SETUP.md).
@@ -50,6 +51,12 @@ export default async function SettingsPage() {
           </p>
         </section>
       </div>
+
+      <section className="mt-6 rounded-3xl border border-line bg-bg p-6">
+        <h2 className="mb-1 font-display text-xl font-semibold">Password</h2>
+        <p className="mb-5 max-w-xl text-sm leading-relaxed text-muted">Set or change the password you use to sign in. It goes straight to the sign-in service. This website never stores or shows it.</p>
+        <div className="max-w-md"><ChangePasswordForm /></div>
+      </section>
 
       <section className="mt-6 rounded-3xl border border-line bg-bg p-6">
         <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-semibold"><KeyRound className="h-5 w-5 text-accent-text" aria-hidden /> Change history</h2>

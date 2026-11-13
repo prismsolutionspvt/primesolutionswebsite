@@ -10,9 +10,9 @@ Run everything: `npm run check` (types + lint + build) and `npm test` (unit + da
 | `next lint` | no warnings or errors |
 | `next build` (production) | succeeds; all routes compile; the build works with an empty Supabase project (falls back to the built-in content) |
 | `npm run db:test`: **30 tests**, run against the real migrations + seed in an in-process PostgreSQL (PGlite) with Supabase's roles/grants stubbed | all pass (below) |
-| `npm run test:unit`: **22 tests** | all pass (below) |
+| `npm run test:unit`: **23 tests** | all pass (below) |
 | Secret scan | no service-role/secret key in the browser bundle or in git; `.env.local` is git-ignored |
-| Browser (production build, then dev) | unauthenticated `/admin`, `/admin/enquiries` → sign-in; `/api/admin/session` → `{"admin":false}`; forged `/auth/callback?code=…` → rejected; sign-in form gives the neutral reply for a non-owner address; public site renders all sections incl. Reviews with no horizontal overflow at 390 px; star rating, mood face, live preview and burst work; review validation messages; a review submission reaches Supabase and shows a friendly error (tables not created yet); admin shell, forms, editor drawer with subcategories render; a save with no session is refused by the server ("Your session has expired") |
+| Browser (production build, then dev) | unauthenticated `/admin`, `/admin/enquiries` → sign-in; `/api/admin/session` → `{"admin":false}`; forged `/auth/callback?code=…` → rejected; sign-in form gives the neutral reply for a non-owner address; public site renders all sections incl. Reviews with no horizontal overflow at 390 px; star rating, mood face, live preview and burst work; review validation messages; a review submission reaches Supabase and shows a friendly error (tables not created yet); admin shell, forms, editor drawer with subcategories render; a save with no session is refused by the server ("Your session has expired"); the password form answers a wrong email/password with the one neutral message |
 
 ### Database security suite (what it proves)
 
@@ -26,13 +26,13 @@ Run everything: `npm run check` (types + lint + build) and `npm test` (unit + da
 
 ### Unit suite (what it proves)
 
-Server-side form validation (trim/control characters, required/length, URL schemes, image paths, lines/paragraphs, numbers, selects, multi-selects, dates, email/phone/digits/slug, pairs; every admin module's definition is internally consistent), the public review and enquiry validators (honeypot, minimum fill time, rating, lengths), the database→website **mapper** (numbering, derived groups, industry `fits` filtering, subcategories, FAQ topics, WhatsApp digits, Instagram toggle, theme/logo, hidden sections, expired announcements), and the **announcement rules** (schedule window, once per visitor/session/every visit, dismissal, "edited = new", highest priority only).
+Owner password rules, server-side form validation (trim/control characters, required/length, URL schemes, image paths, lines/paragraphs, numbers, selects, multi-selects, dates, email/phone/digits/slug, pairs; every admin module's definition is internally consistent), the public review and enquiry validators (honeypot, minimum fill time, rating, lengths), the database→website **mapper** (numbering, derived groups, industry `fits` filtering, subcategories, FAQ topics, WhatsApp digits, Instagram toggle, theme/logo, hidden sections, expired announcements), and the **announcement rules** (schedule window, once per visitor/session/every visit, dismissal, "edited = new", highest priority only).
 
 ## NOT tested (be clear about these)
 
 | Not tested | Why / what to do |
 | --- | --- |
-| **The real sign-in email and link on your Supabase project** | The owner user does not exist yet and a link email must reach your inbox. Follow [SUPABASE_SETUP.md](SUPABASE_SETUP.md) §6, then tell me what you see. |
+| **A real sign-in (password or email link) as the owner** | Needs the owner user and a password only you know; the code never handles it. Only the failure path (wrong credentials) was exercised. Follow [SUPABASE_SETUP.md](SUPABASE_SETUP.md) §6. |
 | **Admin create / edit / delete against the hosted database** | Needs the owner session. The same code paths are covered only indirectly: the SQL by the Postgres suite, the validation by unit tests, the UI by the visual harness. A first real run is required. |
 | **Image upload to hosted Storage** | Needs the owner session and the bucket created by migration 04. The sniffing/validation logic and the policies are tested; the upload itself is not. |
 | **RLS on hosted Supabase itself** | Tested on real PostgreSQL via PGlite with Supabase's grants emulated. Supabase-specific objects (`auth.users`, `auth.uid()`, `storage.objects`) are stubs. Re-run a smoke test on the hosted project after migrating. |

@@ -21,7 +21,7 @@ What this created is described in [DATABASE.md](DATABASE.md) and [STORAGE.md](ST
 2. **Authentication → Users → Add user**:
    - Email: `prismsolutions.pvt@gmail.com`
    - Tick **Auto Confirm User**.
-   - If it asks for a password, type a very long random one (30+ characters) and do not save it anywhere. You will never use it; sign-in is by email link. (Do **not** pick a password you reuse: see the note in [AUTH_SETUP.md](AUTH_SETUP.md#threat-notes).)
+   - It asks for a password: choose a long one (12+ characters, a short sentence of unrelated words works well) that you use nowhere else. This is the password you will sign in with. You can change it later in **Admin → Admin Settings → Password**. (See the note in [AUTH_SETUP.md](AUTH_SETUP.md#threat-notes).)
 3. Do **not** enable Google or any other provider; they are not used.
 
 ## 3. Tell Supabase where the site lives
@@ -60,7 +60,7 @@ Local development: `.env.local` (already created, git-ignored) contains the URL 
 ## 6. Check it works
 
 1. `npm run dev`, open `http://localhost:5200/admin`. You are sent to the sign-in page.
-2. Enter `prismsolutions.pvt@gmail.com` → open the emailed link **in the same browser** → you land in the dashboard.
+2. Enter `prismsolutions.pvt@gmail.com` and your password → you land in the dashboard. (Forgot it? Choose "Email me a sign-in link" and open the link **in the same browser**.)
 3. The home page now shows a small **Admin panel** button in the header (only for you).
 4. Edit anything (for example the phone number in **Contact & Social**). Reload the public site: it changes at once.
 
