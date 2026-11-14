@@ -11,10 +11,9 @@ export const metadata = { title: "Admin Settings" };
 export default async function SettingsPage() {
   const admin = await getAdmin();
   const sb = await createServerSupabase();
-  const [content, seeded, media, log] = await Promise.all([
+  const [content, seeded, log] = await Promise.all([
     getSiteContent(),
     sb.from("site_settings").select("content_seeded").eq("id", 1).maybeSingle(),
-    sb.from("media_assets").select("*", { count: "exact", head: true }),
     sb.from("activity_log").select("id,at,table_name,action,label").order("at", { ascending: false }).limit(25),
   ]);
 
@@ -43,7 +42,6 @@ export default async function SettingsPage() {
           <ul className="space-y-3 text-sm">
             <li className="flex items-start justify-between gap-3"><span>Website content source</span><b className={content.source === "database" ? "text-[#2F8071]" : "text-accent-text"}>{content.source === "database" ? "Your database" : "Built-in defaults"}</b></li>
             <li className="flex items-start justify-between gap-3"><span>Starter content loaded</span><b className={seeded.data?.content_seeded ? "text-[#2F8071]" : "text-accent-text"}>{seeded.data?.content_seeded ? "Yes" : "Not yet (run seed.sql)"}</b></li>
-            <li className="flex items-start justify-between gap-3"><span>Images in the library</span><b>{media.count ?? 0}</b></li>
             <li className="flex items-start justify-between gap-3"><span>Enquiry email notifications</span><b className="text-muted">Not configured</b></li>
           </ul>
           <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted">

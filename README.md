@@ -4,7 +4,7 @@ Marketing website for **Prism Solutions**, a US-based Business Process Outsourci
 
 This repository now contains the **website, the Supabase backend and the owner's admin panel**. Every piece of public content (services, industries, team, values, FAQs, reviews, announcements, contact details, footer, WhatsApp, theme defaults…) is managed from `/admin` and stored in Supabase. The original text in `src/content/` is kept as the starter content and as the fallback if the database is unreachable.
 
-**Read first:** [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) (what you must click in Supabase), [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) (how the owner-only lock works), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (how it fits together), [docs/TESTING.md](docs/TESTING.md) (what was actually tested, and what was not).
+**Read first:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (handover and what the client must configure), [docs/SECURITY.md](docs/SECURITY.md), [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) (what you must click in Supabase), [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) (how the owner-only lock works), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (how it fits together), [docs/TESTING.md](docs/TESTING.md) (what was actually tested, and what was not).
 
 ## Contents
 
@@ -37,7 +37,7 @@ This repository now contains the **website, the Supabase backend and the owner's
 - Accessibility: semantic landmarks, keyboard-operable menus, tabs and accordions, visible focus, `prefers-reduced-motion` support.
 - **Leave a review:** an interactive section (star-burst rating, a face that changes mood, a live preview, a confetti finish). Reviews arrive as *pending* and appear only after the owner approves them.
 - **Announcements:** an animated pop-up (a bottom sheet on phones) with scheduling, priority and "how often" rules, managed from the admin.
-- **Admin panel** at `/admin`: owner-only (email + password, with an emailed one-time link as backup), with 17 modules (content, services with subcategories, industries, team, reviews, FAQs, announcements, enquiries inbox, media library, contact & social, appearance, settings).
+- **Admin panel** at `/admin`: owner-only (email + password, with an emailed one-time link as backup), with 15 modules (content, services with subcategories, industries, team with photographs, service and industry images, reviews, FAQs, announcements, enquiries inbox, contact & social incl. footer text, settings).
 
 ## Tech stack
 
@@ -77,7 +77,7 @@ Copy `.env.example` to `.env.local`. **Never commit `.env*` files** (git-ignored
 | -------- | ---------------- | ----- |
 | `NEXT_PUBLIC_SUPABASE_URL` | browser + server | Your project URL. Public. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | browser + server | The *publishable* (anon) key. Designed to be public: what it can do is decided by Row Level Security. |
-| `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap | Only a fallback: the owner can set the site address in Admin → Website Appearance. |
+| `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap | Only a fallback: a site address stored in `site_settings.site_url` takes precedence. |
 | `ADMIN_OWNER_EMAIL` | server only, optional | Only decides **to whom** the sign-in page sends a link. It never grants access. Defaults to `prismsolutions.pvt@gmail.com`. |
 
 There is **no service-role key** anywhere: the app never needs one and must never be given one. Unset Supabase variables are safe: the site renders its built-in content and the admin shows "not configured". Contact details, WhatsApp number, Instagram etc. are now edited in the admin, not in environment variables.
@@ -92,7 +92,9 @@ There is **no service-role key** anywhere: the app never needs one and must neve
 | `npm run typecheck` | `tsc --noEmit`                                       |
 | `npm run lint`      | ESLint via `next lint`                               |
 | `npm run check`     | Typecheck + lint + build (run before opening a PR)   |
-| `npm run db:test`   | Run every migration + the seed in an in-process Postgres and attack the access rules (32 tests) |
+| `npm test`          | Unit tests (32) + database tests (73). The database tests run every migration + the seed in an in-process Postgres, attack the access rules and drive every admin module end to end |
+| `npm run security:check` | With the production server running: attack the running site and your Supabase project as a visitor; every attack must be refused |
+| `npm run audit:links` | With the production server running: check every link and button on the rendered public pages |
 | `npm run db:seed:generate` | Rebuild `supabase/seed.sql` from `src/content` |
 | `npm run db:bundle` | Concatenate migrations + seed into one pasteable file (`supabase/_bundle.sql`) |
 
@@ -111,7 +113,7 @@ src/
 ├── admin/                    # Admin engine: fields.ts (form definitions), registry.ts (every module), parse.ts (server validation),
 │   │                         #   data.ts (loaders), actions/ (content, media, enquiries, auth: all re-check the owner)
 ├── components/
-│   ├── admin/                # Shell, forms, drawer, image picker, media library, enquiry controls
+│   ├── admin/                # Shell, forms, drawer, image picker, enquiry controls
 │   ├── layout/ motion/ sections/ ui/ providers/
 ├── config/                   # site.ts (defaults), owner.ts (who gets a sign-in link), adaptive.ts (Prism Adaptive tones)
 ├── content/                  # Built-in starter content: seed source and offline fallback

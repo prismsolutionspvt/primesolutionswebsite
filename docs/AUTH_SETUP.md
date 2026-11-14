@@ -47,6 +47,13 @@ Then add that user in **Authentication → Users**, and update `ADMIN_OWNER_EMAI
 
 Every policy goes through the single function `public.is_owner()`, so Administrator / Content Manager roles can be added later by replacing the `owner_lock` row with a small allow-list table and widening that one function (plus a role column for finer rules). This was deliberately **not** built now: the requirement is a lock on one email.
 
+## Sign-out, expiry and reset
+
+- **Sign-out** calls Supabase `signOut` (all of that user's sessions are revoked) and returns to the sign-in page. A copied session cookie stops working.
+- **Expiry:** Supabase refresh tokens renew the session; the middleware refreshes on each admin request. An expired or revoked session redirects to sign-in, and a Server Action answers "Your session has expired" without touching data.
+- **Forgotten password:** the "Email me a sign-in link" option signs the owner in, then **Admin Settings → Password** sets a new one. It only works if Supabase can send e-mail (see SUPABASE_SETUP step 4); otherwise the Supabase dashboard (Authentication → Users) can reset the password.
+- **Public registration is disabled** in Supabase, and `npm run security:check` fails if it is turned back on.
+
 ## Threat notes
 
 - **Passwords.** The database checks *who* the user is, not *how* they signed in, so a leaked or guessed password is enough to get in. Use a long passphrase that you use nowhere else, change it if you suspect it has leaked, and keep the email-link option as the way to recover. Supabase rate-limits password attempts and this app adds its own limit, but neither replaces a strong password. Multi-factor authentication (an extra code) is the next step and is reserved for the audit.

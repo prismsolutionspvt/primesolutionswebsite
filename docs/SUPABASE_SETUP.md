@@ -13,6 +13,8 @@ Your project: `https://zlujppdxogexreebdppu.supabase.co`. The code is ready, but
 3. Check **Table Editor**: you should see `site_settings`, `services` (7 rows), `faqs` (10 rows), `enquiries`, `testimonials`, and so on, each with the RLS shield on.
 4. Check **Storage**: a public bucket named `site-media`.
 
+> **Migrations added later** (for example `20261114000100_hardening.sql`) must be run **once, in order**, on a project that already has the earlier ones: paste just that file into the SQL Editor. Run it **before** deploying the code version that needs it.
+
 What this created is described in [DATABASE.md](DATABASE.md) and [STORAGE.md](STORAGE.md).
 
 ## 2. Lock sign-ups and add the owner (one time)

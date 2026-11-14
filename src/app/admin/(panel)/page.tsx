@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowUpRight, CheckCircle2, Inbox, Layers, MessageSquareQuote, Megaphone, PlusCircle, UserPlus, Users2, HelpCircle, Pencil } from "lucide-react";
+import { AlertCircle, ArrowUpRight, CheckCircle2, Inbox, Layers, MessageSquareQuote, Megaphone, PlusCircle, UserPlus, HelpCircle, Pencil } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getAdmin } from "@/lib/auth/admin";
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -113,7 +113,6 @@ export default async function Overview({ searchParams }: { searchParams: Promise
             { href: "/admin/announcements?new=1", label: "Add announcement", Icon: Megaphone },
             { href: "/admin/enquiries", label: "View enquiries", Icon: Inbox },
             { href: "/admin/company", label: "Edit website content", Icon: Pencil },
-            { href: "/admin/media", label: "Upload images", Icon: Users2 },
           ].map(({ href, label, Icon }) => (
             <a key={label} href={href} className="inline-flex min-h-[46px] items-center gap-2 rounded-full border border-line bg-bg px-5 text-sm font-semibold transition hover:border-accent hover:shadow-md">
               <Icon className="h-4 w-4 text-accent-text" aria-hidden /> {label}

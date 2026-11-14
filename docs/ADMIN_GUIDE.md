@@ -13,15 +13,13 @@ Open `/admin` on your website and sign in with your email and password. (Forgott
 | **Why Prism** | The reasons around the animated ring (any number works) |
 | **Our Approach** | The stages of “How we work” |
 | **Services** | Services and, inside each, its subcategories; group heading, icon, image, publish/hide, order |
-| **Industries** | Industries, which services fit, illustration, image |
+| **Industries** | Industries, which services fit, illustration or image |
 | **Team Management** | “Meet the People Behind Prism”: real names, roles, bios, photographs |
 | **Testimonials** | **Approve or reject visitor reviews**, feature the best, add your own genuine testimonials |
 | **FAQs** | Questions and answers; the topic you type becomes a filter chip |
-| **Announcements** | The pop-up: text, image, button, start/end, priority, how often, can it be closed |
+| **Announcements** | The pop-up: text, button, start/end, priority, how often, can it be closed |
 | **Enquiries** | Contact-form messages: search, filter, status, internal notes, copy email/phone, delete |
-| **Media Library** | Upload, describe, replace and delete images (unused ones only) |
-| **Contact & Social** | Email, phone, address, WhatsApp (country code, number, message, on/off), Instagram, other links |
-| **Website Appearance** | Logo, favicon, share image, search title/description/indexing, footer, the “Powered by” credit, default theme and the theme switcher, show/hide sections |
+| **Contact & Social** | Email, phone, address, WhatsApp (country code, number, message, on/off), Instagram, other links, footer small print and scrolling phrases |
 | **Admin Settings** | Who can sign in, setup status, change history |
 
 ## Everyday tasks
@@ -38,6 +36,6 @@ Open `/admin` on your website and sign in with your email and password. (Forgott
 
 - Text boxes are plain text. Leave a blank line between paragraphs. (No formatting toolbar: it keeps the site safe and consistent.)
 - Enquiries are **saved here only**. No email is sent to you, so check **Enquiries** regularly (the sidebar shows a badge for new ones).
-- Images up to 5 MB (JPG, PNG, WebP, AVIF, GIF, ICO). Always add a short description for accessibility.
-- An image that is in use cannot be deleted; use **Replace** to swap the file.
+- Pictures you can manage: each **team member's photograph**, each **service's image** (shown at the top of the service when opened) and each **industry's image** (replaces the line drawing; leave empty to keep the drawing). Use the **Choose image** button: pick one you uploaded before or upload a new one (JPG, PNG, WebP, AVIF, GIF or ICO, up to 5 MB). Every other optional image field was removed.
+- There is no screen for the logo, favicon, share image, theme default or the “Powered by” credit: those keep the values they were set up with (stored in the database).
 - If you ever see “Your session has expired”, sign in again.

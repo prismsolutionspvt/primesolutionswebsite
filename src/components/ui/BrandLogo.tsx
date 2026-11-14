@@ -8,7 +8,7 @@ type Props = {
   height?: number;
   priority?: boolean;
   className?: string;
-  /** Owner-uploaded logo URL (Admin → Website Appearance). Empty = the original artwork. */
+  /** Logo URL from site_settings.logo_primary_path. Empty = the original artwork. */
   src?: string;
 };
 

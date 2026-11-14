@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Building2, CircleHelp, ExternalLink, Factory, Gem, Images, Inbox, Layers, LayoutDashboard, LogOut, Megaphone, Menu, Palette, Phone, Quote, Route, Settings, Sparkles, Target, Users, X, type LucideIcon } from "lucide-react";
+import { Building2, CircleHelp, ExternalLink, Factory, Gem, Inbox, Layers, LayoutDashboard, LogOut, Megaphone, Menu, Phone, Quote, Route, Settings, Sparkles, Target, Users, X, type LucideIcon } from "lucide-react";
 import { signOutAction } from "@/admin/actions/auth";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
@@ -33,9 +33,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: "Site",
     items: [
-      { href: "/admin/media", label: "Media Library", icon: Images },
       { href: "/admin/contact", label: "Contact & Social", icon: Phone },
-      { href: "/admin/appearance", label: "Website Appearance", icon: Palette },
       { href: "/admin/settings", label: "Admin Settings", icon: Settings },
     ],
   },

@@ -1,84 +1,18 @@
 /**
- * Database security tests — run the REAL migrations + seed in an in-process Postgres (PGlite) and attack them.
+ * Database security tests: run the REAL migrations + seed in an in-process Postgres (PGlite) and attack them.
  *   npm run db:test
- *
- * PGlite is plain Postgres, so Row Level Security, column grants, triggers, domains and security-definer functions
- * behave exactly as on Supabase. Only Supabase's own pieces are stubbed (auth.users / auth.identities / auth.uid() /
- * auth.jwt(), the storage tables and the anon / authenticated roles with Supabase's default grants).
- * What this does NOT prove: Google OAuth itself, or the hosted Supabase configuration. See docs/TESTING.md.
+ * See harness.mjs for what is stubbed (only Supabase-owned pieces). Not proven here: Google/e-mail delivery or the hosted config.
  */
-import { test, before, after } from "node:test";
+import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { PGlite } from "@electric-sql/pglite";
+import { bootDb, ID, OWNER_EMAIL } from "./harness.mjs";
 
-const dir = path.dirname(fileURLToPath(import.meta.url));
-const sup = path.join(dir, "..");
-const read = (f) => fs.readFileSync(path.join(sup, f), "utf8");
-
-const OWNER_EMAIL = "prismsolutions.pvt@gmail.com";
-const ID = {
-  owner: "00000000-0000-0000-0000-0000000000a1",
-  stranger: "00000000-0000-0000-0000-0000000000b2",
-  unconfirmed: "00000000-0000-0000-0000-0000000000e5",
-};
-
-let db;
-
-/** Run `fn` as a Supabase role with the given JWT claims. */
-async function as(role, claims, fn) {
-  await db.query(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify(claims ?? {})]);
-  await db.exec(`set role ${role}`);
-  try {
-    return await fn();
-  } finally {
-    await db.exec("reset role");
-  }
-}
-const anon = (fn) => as("anon", {}, fn);
-const user = (id, email, fn) => as("authenticated", { sub: id, email, role: "authenticated" }, fn);
-const owner = (fn) => user(ID.owner, OWNER_EMAIL, fn);
-const stranger = (fn) => user(ID.stranger, "someone.else@gmail.com", fn);
-
-/** Expect a SQL error, optionally matching a message. */
-async function denied(promise, pattern = /./) {
-  await assert.rejects(promise, (e) => pattern.test(String(e.message)), "expected the database to refuse this");
-}
-const rows = async (sql, params) => (await db.query(sql, params)).rows;
-
-before(async () => {
-  db = new PGlite();
-  await db.exec(`
-    create role anon nologin; create role authenticated nologin; create role service_role nologin; create role supabase_auth_admin nologin;
-    create schema auth; create schema storage;
-    create table auth.users (id uuid primary key, email text, email_confirmed_at timestamptz);
-    create table auth.identities (id uuid primary key default gen_random_uuid(), user_id uuid not null, provider text not null, identity_data jsonb not null default '{}');
-    create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
-    create function auth.uid() returns uuid language sql stable as $$ select nullif(auth.jwt() ->> 'sub', '')::uuid $$;
-    create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
-    create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text, owner uuid);
-    alter table storage.objects enable row level security;
-    grant usage on schema public, auth, storage to anon, authenticated, service_role;
-        -- Supabase's default privileges: new public tables/functions are open to the API roles until a migration closes them
-    alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-    alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-    grant all on storage.objects to anon, authenticated, service_role;
-    grant select on auth.users to authenticated; -- (real Supabase does not allow this; the definer functions do not need it)
-    revoke select on auth.users from authenticated;
-  `);
-
-  await db.exec(`
-    insert into auth.users (id, email, email_confirmed_at) values
-      ('${ID.owner}', '${OWNER_EMAIL}', now()),
-      ('${ID.stranger}', 'someone.else@gmail.com', now()),
-      ('${ID.unconfirmed}', '${OWNER_EMAIL}', null);   -- same address as the owner, but never confirmed
-  `);
-
-  for (const f of fs.readdirSync(path.join(sup, "migrations")).sort()) await db.exec(read(`migrations/${f}`));
-  await db.exec(read("seed.sql"));
-});
+const seedSql = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "seed.sql"), "utf8");
+const H = await bootDb();
+const { db, anon, owner, stranger, user, rows, denied } = H;
 after(async () => db?.close());
 
 // ───────────────────────────────────────────────────── identity
@@ -131,7 +65,7 @@ test("seed loaded the approved starter content and flipped content_seeded", asyn
 });
 
 test("the seed is idempotent", async () => {
-  await db.exec(read("seed.sql"));
+  await db.exec(seedSql);
   assert.equal((await rows("select count(*)::int n from services"))[0].n, 7);
 });
 

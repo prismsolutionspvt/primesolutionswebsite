@@ -113,7 +113,7 @@ export function ResourceManager({ def, rows, childRows = {}, options = {} }: { d
                     )}
                   </span>
                 )}
-                <button type="button" onClick={() => setEditing(r)} className="min-w-0 flex-1 text-left">
+                <button type="button" onClick={() => setEditing(r)} className="min-w-0 flex-1 basis-[11rem] text-left">
                   <span className="flex items-center gap-2">
                     <span className="truncate font-semibold">{title || <span className="font-normal italic text-muted">Empty slot</span>}</span>
                     {def.tabs && <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[0.68rem] font-semibold capitalize ${statusTone[status] ?? "bg-surface2"}`}>{status}</span>}
@@ -285,16 +285,11 @@ function ChildEditor({ ch, items, onChange, error }: { ch: ChildDef; items: Chil
 
 /** A quick look at how the announcement will read (the real pop-up adds the animation). */
 function AnnouncementPreview({ values }: { values: FormValues }) {
-  const img = typeof values.image_path === "string" && values.image_path ? mediaUrl(values.image_path) : "";
   return (
     <fieldset>
       <legend className="mb-4 w-full border-b border-line pb-2 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-accent-text">Preview</legend>
-      <div className="overflow-hidden rounded-2xl border border-line bg-surface sm:grid sm:grid-cols-2">
-        {img && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={img} alt="" className="h-40 w-full object-cover sm:h-full" />
-        )}
-        <div className={`p-5 ${img ? "" : "sm:col-span-2"}`}>
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+        <div className="p-5">
           <p className="font-display text-xl font-semibold leading-tight">{String(values.title || "Your announcement title")}</p>
           {values.short_description ? <p className="mt-2 text-sm text-muted">{String(values.short_description)}</p> : null}
           {values.cta_text ? <span className="btn btn-primary mt-4 !min-h-[40px] text-sm">{String(values.cta_text)}</span> : null}

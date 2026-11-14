@@ -84,26 +84,12 @@ export async function saveRecord(key: string, id: string | null, raw: FormValues
       if (!p.ok) return { ok: false, error: `${ch.singular} ${i + 1}: ${Object.values(p.errors)[0]}`, fieldErrors: { [`__children`]: Object.values(p.errors)[0] } };
       items.push({ id: typeof c.id === "string" ? c.id : undefined, data: p.data });
     }
-    const { data: existing, error: readErr } = await g.supabase.from(ch.table).select("id").eq(ch.fk, rowId);
-    if (readErr) return friendly(readErr);
-    const keep = new Set(items.filter((i) => i.id).map((i) => i.id));
-    const gone = (existing ?? []).map((r) => r.id as string).filter((x) => !keep.has(x));
-    if (gone.length) {
-      const { error } = await g.supabase.from(ch.table).delete().in("id", gone);
-      if (error) return friendly(error);
-    }
-    const fresh: Record<string, unknown>[] = [];
-    for (const [i, it] of items.entries()) {
-      const row = { ...it.data, sort_order: (i + 1) * 10 };
-      if (it.id) {
-        const { error } = await g.supabase.from(ch.table).update(row).eq("id", it.id).eq(ch.fk, rowId);
-        if (error) return friendly(error);
-      } else fresh.push({ ...row, [ch.fk]: rowId });
-    }
-    if (fresh.length) {
-      const { error } = await g.supabase.from(ch.table).insert(fresh);
-      if (error) return friendly(error);
-    }
+    // ONE database call: the whole list is saved or none of it (see save_service_subcategories in the hardening migration)
+    const { error: childError } = await g.supabase.rpc("save_service_subcategories", {
+      p_service: rowId,
+      p_items: items.map((it) => ({ id: it.id ?? null, title: it.data.title, detail: it.data.detail ?? "", is_published: it.data.is_published !== false })),
+    });
+    if (childError) return friendly(childError);
   }
   publish();
   return { ok: true, id: rowId as string };
@@ -170,22 +156,9 @@ export async function saveSingleton(key: string, raw: FormValues): Promise<Actio
     if (error) return friendly(error);
   } else {
     const patch: Record<string, unknown> = { ...parsed.data };
-    if (def.table === "site_settings") patch.updated_by = g.email;
-    // empty optional text fields that have a NOT NULL default stay as empty strings (parse already did this)
     const { error } = await g.supabase.from(def.table).update(patch).eq("id", 1);
     if (error) return friendly(error);
   }
-  publish();
-  return { ok: true };
-}
-
-/** Show or hide a whole public section. */
-export async function setSectionVisible(sectionKey: string, visible: boolean): Promise<ActionResult> {
-  if (!/^[a-z_]{2,30}$/.test(sectionKey) || typeof visible !== "boolean") return { ok: false, error: "Invalid request." };
-  const g = await guard();
-  if ("fail" in g) return g.fail;
-  const { error } = await g.supabase.from("site_sections").upsert({ key: sectionKey, is_visible: visible }, { onConflict: "key" });
-  if (error) return friendly(error);
   publish();
   return { ok: true };
 }

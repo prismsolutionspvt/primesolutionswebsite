@@ -4,6 +4,7 @@ import { createAnonSupabase } from "@/lib/supabase/anon";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { defaultContent } from "./defaults";
 import { mapContent, type RawContent } from "./map";
+import { PUBLIC_SETTINGS_COLUMNS } from "./columns";
 import type { SiteContent } from "./types";
 
 /** Cache tag: every admin save calls revalidateTag(CONTENT_TAG) so edits reach the public site immediately. */
@@ -15,7 +16,7 @@ async function loadFromDatabase(): Promise<SiteContent> {
 
   // ONE round of parallel queries for the whole site (cached below), never one per component.
   const [settings, sections, mv, services, subs, industries, team, values, why, steps, faqs, testimonials, announcements, social] = await Promise.all([
-    sb.from("site_settings").select("*").eq("id", 1).maybeSingle(),
+    sb.from("site_settings").select(PUBLIC_SETTINGS_COLUMNS).eq("id", 1).maybeSingle(),
     sb.from("site_sections").select("*"),
     sb.from("mission_vision").select("*").eq("id", 1).maybeSingle(),
     ordered("services"),
@@ -33,8 +34,10 @@ async function loadFromDatabase(): Promise<SiteContent> {
   const failed = [settings, sections, mv, services, subs, industries, team, values, why, steps, faqs, testimonials, announcements, social].find((r) => r.error);
   if (failed?.error) throw new Error(`Supabase read failed: ${failed.error.message}`);
 
+  // the column list is a runtime string, so the client cannot infer the row type: it is the public subset of site_settings
+  const settingsRow = settings.data as unknown as Record<string, unknown> | null;
   const raw: RawContent = {
-    settings: settings.data,
+    settings: settingsRow,
     sections: sections.data ?? [],
     missionVision: mv.data,
     services: services.data ?? [],
@@ -51,7 +54,7 @@ async function loadFromDatabase(): Promise<SiteContent> {
   };
   const mapped = mapContent(raw);
   // Migrations applied but the starter content not loaded yet: keep the built-in text, but honour live settings.
-  if (!settings.data?.content_seeded) {
+  if (!settingsRow?.content_seeded) {
     return { ...defaultContent, settings: mapped.settings, testimonials: mapped.testimonials, announcements: mapped.announcements };
   }
   return mapped;

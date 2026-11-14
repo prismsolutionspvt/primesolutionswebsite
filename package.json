@@ -10,10 +10,12 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run build",
     "db:seed:generate": "node scripts/generate-seed.mjs",
-    "db:test": "node --test supabase/tests/rls.test.mjs",
+    "db:test": "node --test supabase/tests/rls.test.mjs supabase/tests/admin-flow.test.mjs supabase/tests/hardening.test.mjs",
     "db:bundle": "node scripts/bundle-sql.mjs",
     "test:unit": "node --test scripts/unit.test.mjs",
-    "test": "npm run test:unit && npm run db:test"
+    "test": "npm run test:unit && npm run db:test",
+    "audit:links": "node scripts/link-audit.mjs",
+    "security:check": "node scripts/security-check.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",
@@ -41,5 +43,10 @@
   "description": "Marketing website for Prism Solutions (Next.js App Router, GSAP).",
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.32"
+    }
   }
 }

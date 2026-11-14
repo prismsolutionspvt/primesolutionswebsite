@@ -48,4 +48,4 @@ anon can only: `SELECT` published rows, `INSERT` a *pending* review, `INSERT` a 
 
 ## Left for the audit
 
-Not claimed as done: SEO audit (structured data beyond Organization/FAQ, per-page meta for legal pages, image alt audit), a Content-Security-Policy, MFA, CAPTCHA on public forms and sign-in, shared-store rate limiting (the limiter is per server instance), dependency audit (`npm audit --omit=dev` currently reports 2 advisories, 1 high and 1 moderate, in the PostCSS copy bundled with Next 15, which processes CSS at build time; the automatic fix is a breaking jump to Next 16, so it is left for the audit), error logging service, backup/recovery plan (Supabase backups depend on your plan), email notifications (no provider is connected; the admin says so), audit-log retention, load testing, real-device performance testing.
+See [SECURITY.md](SECURITY.md#not-covered--accepted-risks) for the current list of accepted risks and what is not covered (MFA, CAPTCHA, shared-store rate limiting, a nonce-based CSP, a third-party penetration test, dev-only lint-toolchain advisories). Not built by agreement: enquiry e-mail notifications, advanced SEO, analytics.

@@ -11,13 +11,24 @@ import type { SiteSettings } from "@/types";
  */
 const env = (v: string | undefined) => (v && v.trim().length > 0 ? v.trim() : "");
 
+function siteUrl() {
+  const explicit = env(process.env.NEXT_PUBLIC_SITE_URL);
+  if (explicit) return explicit.replace(/\/+$/, "");
+  const netlify = env(process.env.URL);
+  if (netlify.startsWith("https://")) return netlify.replace(/\/+$/, "");
+  const vercel = env(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  if (vercel) return `https://${vercel}`;
+  return "http://localhost:5200";
+}
+
 export const settings: SiteSettings = {
   company: {
     name: "Prism Solutions",
     tagline: "Your Partner in Business Growth.",
     // The portfolio identifies the company as US-based but gives no city or state.
     locationLabel: "United States",
-    url: env(process.env.NEXT_PUBLIC_SITE_URL) || "https://example.com",
+    // production origin, no code change needed: NEXT_PUBLIC_SITE_URL, else the host platform's own variable (Netlify / Vercel), else local
+    url: siteUrl(),
     description:
       "Prism Solutions is a US-based BPO and Digital Services company: customer support, sales and telemarketing, appointment setting, lead generation, back-office support and digital marketing from one partner.",
   },
@@ -48,11 +59,6 @@ export const site = {
 
 export const whatsappMessage = "Hello Prism Solutions, I would like to discuss my business requirements.";
 
-export function whatsappLink(message = whatsappMessage) {
-  const base = settings.contact.whatsappNumber ? `https://wa.me/${settings.contact.whatsappNumber}` : "https://wa.me/";
-  return `${base}?text=${encodeURIComponent(message)}`;
-}
-
 export const navLinks = [
   { label: "Home", href: "/#top", id: "top" },
   { label: "About", href: "/#about", id: "about" },
@@ -68,5 +74,5 @@ export function buildWhatsappLink(wa: { number: string; message: string }) {
   return `${base}?text=${encodeURIComponent(wa.message)}`;
 }
 
-/** Attribution link shown at the bottom of the site (defaults; the live value comes from Admin → Website Appearance). */
+/** Attribution link shown at the bottom of the site (defaults; the live value comes from site_settings). */
 export const poweredBy = { label: "FRX Technologies", href: "https://frxtechnologiesprv.netlify.app/" } as const;

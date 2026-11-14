@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { adaptiveProps } from "@/config/adaptive";
 import { registerGsap } from "@/lib/gsap";
@@ -109,6 +110,7 @@ export function Industries() {
             <div id="ind-stage" role="tabpanel" aria-labelledby={`ind-tab-${ind.id}`} className="overflow-hidden rounded-[2rem] border border-line bg-surface">
               <div data-scene className="relative aspect-[4/3] w-full sm:aspect-[16/10]" style={{ background: `linear-gradient(135deg, ${tone}26 0%, transparent 62%)` }}>
                 <IndustryScene key={ind.id} kind={ind.scene} tone={tone} />
+                {ind.imageUrl && <Image src={ind.imageUrl} alt="" fill sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover" />}
               </div>
               <div className="p-6 sm:p-8">
                 <h3 data-ind-in className="h-display text-[clamp(1.7rem,3vw,2.5rem)]">

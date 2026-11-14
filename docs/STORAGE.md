@@ -23,16 +23,14 @@ Folders (paths are `<folder>/<name>-<random>.<ext>`): `logos/`, `team/`, `servic
 
 The bucket repeats the size and type limits on its own, so they hold even if the app were bypassed.
 
-## Using and replacing images
+## Using images
 
-Every image field in the admin opens the same picker (choose an existing image or upload a new one), so one picture can be reused anywhere. **Replace** (in the Media Library) swaps the file behind an existing image *and keeps its address*, so every place that uses it updates. It must be the same file type.
-
-**Delete** is refused while the image is used anywhere (the list of places is shown). Referenced locations are listed in `REFERENCES` in `media.ts`; add a line there when you add an image column.
+The image fields left in the admin are the team photograph, the service image and the industry image; each opens a picker (choose an uploaded image or upload a new one). The optional image fields on values, why, approach, about, mission, vision, testimonials and announcements were removed (most were never displayed on the website). Their database columns are kept, so nothing stored is lost and a field can be switched back on later. There is no separate library screen, and no way to delete or replace an uploaded file from the admin: files stay in the bucket (and in `media_assets`) once uploaded. Delete unused ones in the Supabase dashboard (Storage → site-media) only after checking that no page uses them.
 
 ## Delivery
 
-Public images are served from Supabase's CDN URL. Section images use `next/image` (resizing, AVIF/WebP) via the `remotePatterns` entry in `next.config.mjs`; **rebuild after changing `NEXT_PUBLIC_SUPABASE_URL`**. Uploads are given a one-year cache header, which is why *Replace* keeps a short (1 h) cache.
+Public images are served from Supabase's CDN URL. Section images use `next/image` (resizing, AVIF/WebP) via the `remotePatterns` entry in `next.config.mjs`; **rebuild after changing `NEXT_PUBLIC_SUPABASE_URL`**. Uploads are given a one-year cache header (each upload gets a new random name, so a changed picture is a new file).
 
 ## Not done
 
-Image dimension checks, automatic resizing on upload, virus scanning, per-folder quotas, and a "where is this used?" panel on every image (the list appears when deleting). Reserved for the audit.
+Deleting or replacing files from the admin, image dimension checks, automatic resizing on upload, virus scanning and per-folder quotas. Reserved for later.

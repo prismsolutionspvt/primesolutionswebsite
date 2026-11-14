@@ -12,7 +12,7 @@ const display = Bricolage_Grotesque({
 const body = Manrope({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
-/** Title, description, share image, favicon and indexing are all editable in Admin → Website Appearance. */
+/** Title, description, share image, favicon and indexing come from the site_settings row (set in the database; there is no admin screen for them). */
 export async function generateMetadata(): Promise<Metadata> {
   const { settings } = await getSiteContent();
   const { seo, company } = settings;
@@ -40,13 +40,14 @@ export const viewport: Viewport = {
 
 /**
  * Runs before first paint: the owner's default theme for first-time visitors (a saved Light/Dark/Adaptive choice
- * wins), a "js" flag, and the first-visit preloader flag (public pages only; the admin has no preloader).
+ * wins), a "js" flag, and the first-visit preloader flag (public pages only; the admin has no preloader). The logo is preloaded
+ * only on that first visit, because only then is the loading screen shown (preloading it elsewhere is wasted bandwidth).
  * `fallback` is one of three fixed strings validated in the database and in the mapper, never free text.
  */
 const bootScript = (fallback: string) => `(function(){var d=document.documentElement;d.classList.add('js');
 var t='${fallback}';try{var s=localStorage.getItem('prism-theme');if(s==='dark'||s==='light'||s==='adaptive')t=s}catch(e){}
 d.dataset.theme=t;
-try{if(!/^\\/(admin|auth)/.test(location.pathname)&&!sessionStorage.getItem('prism-seen')){d.classList.add('is-preloading')}}catch(e){}})();`;
+try{if(!/^\\/(admin|auth)/.test(location.pathname)&&!sessionStorage.getItem('prism-seen')){d.classList.add('is-preloading');var l=document.createElement('link');l.rel='preload';l.as='image';l.href='/brand/prism-logo.jpg';document.head.appendChild(l)}}catch(e){}})();`;
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { settings } = await getSiteContent();
@@ -55,7 +56,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" data-theme={theme} suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript(theme) }} />
-        <link rel="preload" as="image" href="/brand/prism-logo.jpg" />
         <noscript>
           <style>{`.preloader{display:none!important}html.is-preloading,html.is-preloading body{overflow:auto!important}`}</style>
         </noscript>

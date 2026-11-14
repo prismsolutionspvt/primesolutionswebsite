@@ -42,8 +42,6 @@ export type FieldDef = Base &
     | { kind: "pairs"; titleLabel?: string; textLabel?: string; maxItems?: number }
   );
 
-export type FieldKind = FieldDef["kind"];
-
 export type FormSection = { title: string; description?: string; fields: string[] };
 
 /** A child list edited inside its parent's editor (e.g. a service's subcategories). */

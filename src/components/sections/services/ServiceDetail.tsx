@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowUpRight, Plus } from "lucide-react";
 import type { Service } from "@/types";
 
@@ -9,6 +10,11 @@ export function ServiceDetail({ s, twoColumns = false }: { s: Service; twoColumn
 
   return (
     <div data-stage-in>
+      {s.imageUrl && (
+        <div className="relative mb-5 aspect-[16/9] overflow-hidden rounded-2xl bg-surface2">
+          <Image src={s.imageUrl} alt="" fill sizes="(max-width: 1024px) 90vw, 520px" className="object-cover" />
+        </div>
+      )}
       <p className="max-w-[46ch] text-[1.03rem] leading-relaxed text-ink">{s.summary}</p>
       {s.note && <p className="mt-3 max-w-[46ch] border-l-2 border-accent pl-4 text-[0.92rem] leading-relaxed text-muted">{s.note}</p>}
 

@@ -5,31 +5,11 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
 import path from "node:path";
-import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
-import ts from "typescript";
+import { loadTs, root } from "./ts-loader.mjs";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const require = createRequire(import.meta.url);
 process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
-
-const cache = new Map();
-function resolveFile(p) {
-  for (const c of [p, `${p}.ts`, `${p}.tsx`, path.join(p, "index.ts")]) if (fs.existsSync(c) && fs.statSync(c).isFile()) return c;
-  throw new Error(`cannot resolve ${p}`);
-}
-function load(file) {
-  file = resolveFile(file);
-  if (cache.has(file)) return cache.get(file).exports;
-  const out = ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
-  const mod = { exports: {} };
-  cache.set(file, mod);
-  const req = (p) => (p.startsWith(".") ? load(path.resolve(path.dirname(file), p)) : p.startsWith("@/") ? load(path.join(root, "src", p.slice(2))) : require(p));
-  new Function("require", "module", "exports", out)(req, mod, mod.exports);
-  return mod.exports;
-}
+const load = loadTs;
 
 const { parseFields } = load(path.join(root, "src/admin/parse.ts"));
 const { reviewSchema, enquirySchema } = load(path.join(root, "src/lib/validation/public.ts"));
@@ -300,4 +280,107 @@ test("only ONE announcement is chosen: highest priority first, ineligible ones s
   markDismissed(high, v);
   assert.equal(pickAnnouncement([low, high], v)?.id, "low");
   assert.equal(pickAnnouncement([], v), undefined);
+});
+
+// ───────────────────────── every admin Server Action authorises FIRST
+import fs from "node:fs";
+test("every exported admin Server Action verifies the owner before it touches data (they can be called directly, not only via pages)", () => {
+  const files = ["content.ts", "media.ts", "enquiries.ts"].map((f) => path.join(root, "src/admin/actions", f));
+  let checked = 0;
+  for (const file of files) {
+    const src = fs.readFileSync(file, "utf8");
+    assert.match(src.split("\n")[0], /use server/, `${file} must be a "use server" file`);
+    const parts = src.split(/^export async function /m).slice(1);
+    for (const part of parts) {
+      const name = part.slice(0, part.indexOf("("));
+      const firstDb = part.search(/supabase\.|createServerSupabase\(\)|\.from\(|\.rpc\(|\.storage/);
+      const firstAuth = part.search(/\bguard\(\)|\bauthorise\(\)|\bgetAdmin\(\)/);
+      assert.ok(firstAuth >= 0, `${file} › ${name}: no owner check`);
+      assert.ok(firstDb < 0 || firstAuth < firstDb, `${file} › ${name}: touches data before checking the owner`);
+      checked++;
+    }
+  }
+  // password change and sign-out live in auth.ts: the change action must check the owner too
+  const auth = fs.readFileSync(path.join(root, "src/admin/actions/auth.ts"), "utf8");
+  const change = auth.slice(auth.indexOf("export async function changeOwnerPassword"));
+  assert.ok(change.indexOf("getAdmin()") >= 0 && change.indexOf("getAdmin()") < change.indexOf("updateUser"), "changeOwnerPassword must check the owner before updating");
+  assert.ok(checked >= 10, `expected to check at least 10 actions, checked ${checked}`);
+});
+
+test("public Server Actions can only ever write through the anonymous client (never a privileged one)", () => {
+  const pub = fs.readFileSync(path.join(root, "src/app/actions/public.ts"), "utf8");
+  assert.ok(pub.includes("createAnonSupabase"), "public actions must use the anonymous client");
+  assert.ok(!pub.includes("createServerSupabase"), "public actions must not use the signed-in client");
+  // and nothing in the app references a privileged key
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
+  for (const f of walk(path.join(root, "src")).filter((f) => /\.(ts|tsx)$/.test(f))) {
+    assert.ok(!/service_role|SERVICE_ROLE|sb_secret_/.test(fs.readFileSync(f, "utf8")), `${f} references a privileged key`);
+  }
+});
+
+test("no admin page or component renders stored text as raw HTML", () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
+  const allowed = new Set(["src/app/(site)/page.tsx", "src/app/layout.tsx", "src/components/sections/faq/Faq.tsx"].map((p) => path.join(root, p)));
+  for (const f of walk(path.join(root, "src")).filter((f) => /\.tsx$/.test(f))) {
+    if (fs.readFileSync(f, "utf8").includes("dangerouslySetInnerHTML")) assert.ok(allowed.has(f), `${f} uses dangerouslySetInnerHTML`);
+  }
+});
+
+// ───────────────────────── hardening: errors, links, mass assignment, CSP
+test("branded error screens never print technical detail (message, stack, digest) to the visitor", () => {
+  for (const f of ["src/app/error.tsx", "src/app/global-error.tsx", "src/app/not-found.tsx", "src/app/admin/(panel)/error.tsx"]) {
+    const src = fs.readFileSync(path.join(root, f), "utf8");
+    assert.ok(!/\{\s*error\.(message|stack|digest)|error\.(message|stack)\s*\}/.test(src), `${f} renders error detail`);
+    assert.ok(!/<[^>]*>[^<]*\{[^}]*error[^}]*\}[^<]*</.test(src.replace(/console\.error\([^)]*\)/g, "")), `${f} interpolates the error into the page`);
+  }
+});
+
+test("JSON-LD blocks escape '<' so stored text can never close the script tag", () => {
+  for (const f of ["src/app/(site)/page.tsx", "src/components/sections/faq/Faq.tsx"]) {
+    assert.match(fs.readFileSync(path.join(root, f), "utf8"), /u003c/, `${f} must escape < in JSON-LD`);
+  }
+});
+
+test("every file that opens a link in a new tab sets rel=noopener", () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
+  for (const f of walk(path.join(root, "src")).filter((f) => f.endsWith(".tsx"))) {
+    const s = fs.readFileSync(f, "utf8");
+    if (/target=("|\{")_blank|target: "_blank"/.test(s)) assert.match(s, /noopener/, `${f} opens a new tab without rel=noopener`);
+  }
+});
+
+test("public forms ignore fields they do not know (no mass assignment of status, id, featured…)", () => {
+  const good = { name: "Jane Doe", email: "jane@example.com", company: "", phone: "", service: "Customer Support", message: "We need help with support.", trap: "", elapsed: 5000, token: "11111111-1111-4111-8111-111111111111" };
+  const r = enquirySchema.safeParse({ ...good, status: "converted", id: "x", created_at: "2000-01-01", is_featured: true });
+  assert.equal(r.success, true);
+  for (const k of ["status", "id", "created_at", "is_featured"]) assert.ok(!(k in r.data), `${k} must be dropped`);
+  const v = reviewSchema.safeParse({ name: "Sam", company: "", rating: 5, text: "Really helpful and professional.", trap: "", elapsed: 5000, token: good.token, status: "published", source: "owner", is_featured: true, photo_path: "team/x.png" });
+  assert.equal(v.success, true);
+  for (const k of ["status", "source", "is_featured", "photo_path"]) assert.ok(!(k in v.data), `${k} must be dropped from a review`);
+});
+
+test("stored text is never turned into markup: hostile review/FAQ text stays plain text through validation and mapping", () => {
+  const evil = '<img src=x onerror=alert(1)> <script>alert(1)</script> "><svg/onload=alert(1)>';
+  const r = reviewSchema.safeParse({ name: evil.slice(0, 40), company: "", rating: 5, text: evil + " padding text", trap: "", elapsed: 5000, token: "11111111-1111-4111-8111-111111111111" });
+  assert.equal(r.success, true);
+  assert.ok(r.data.text.includes("<script>"), "text is kept as text (escaped by React on render), not stripped into something else");
+  // React renders strings as text nodes: the only raw-HTML sinks are audited above (escaped JSON-LD + fixed theme script)
+});
+
+test("production CSP: no wildcards, no eval, no framing, HSTS, and only the Supabase origin is allowed besides self", async () => {
+  const prev = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://abc.supabase.co";
+  const { pathToFileURL } = await import("node:url");
+  const cfg = (await import(pathToFileURL(path.join(root, "next.config.mjs")).href + "?prod")).default;
+  process.env.NODE_ENV = prev;
+  const headers = Object.fromEntries((await cfg.headers())[0].headers.map((h) => [h.key, h.value]));
+  const csp = headers["Content-Security-Policy"];
+  assert.ok(!/unsafe-eval/.test(csp), "no eval in production");
+  assert.ok(!/(^|\s)\*(\s|;|$)/.test(csp), "no wildcard source");
+  assert.ok(/frame-ancestors 'none'/.test(csp) && /object-src 'none'/.test(csp) && /base-uri 'self'/.test(csp) && /form-action 'self'/.test(csp));
+  const origins = [...csp.matchAll(/https?:\/\/[^\s;]+|wss:\/\/[^\s;]+/g)].map((m) => m[0]);
+  assert.ok(origins.every((o) => /abc\.supabase\.co/.test(o)), `unexpected origin in CSP: ${origins.join(", ")}`);
+  assert.match(headers["Strict-Transport-Security"], /max-age=\d+/);
+  assert.equal(headers["X-Frame-Options"], "DENY");
 });

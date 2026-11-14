@@ -11,6 +11,7 @@ export default function ContactPage() {
         <Block><CopyForm id="contact" /></Block>
         <Block><CopyForm id="whatsapp" /></Block>
         <Block><CopyForm id="instagram" /></Block>
+        <Block><CopyForm id="footer" /></Block>
       </div>
       <ListManager id="social" title="Other social links" />
     </>

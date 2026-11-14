@@ -2,6 +2,8 @@
 
 Guides:
 
+- [DEPLOYMENT.md](DEPLOYMENT.md): handover checklists for FRX and for the client/domain manager
+- [SECURITY.md](SECURITY.md): controls, findings, accepted risks
 - [SUPABASE_SETUP.md](SUPABASE_SETUP.md): the steps you must do in Supabase
 - [AUTH_SETUP.md](AUTH_SETUP.md): the one-owner lock
 - [ARCHITECTURE.md](ARCHITECTURE.md): how the site, cache, admin and database fit together
