@@ -1,0 +1,13 @@
+# Netlify build settings for the Prism Solutions site (Next.js 15 with Server Actions and middleware).
+#
+# Netlify detects Next.js and deploys it with its own Next.js runtime automatically, so there is deliberately
+# NO "publish" directory here (setting one, for example "out" or ".next", breaks the deploy).
+# Secrets and addresses are NOT stored in this file: add them in Netlify under
+# Site configuration -> Environment variables (names are listed in .env.example).
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
